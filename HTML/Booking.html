@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Pet Hotel Booking</title>
+    <link rel="stylesheet" href="../CSS/Bookingstyle.css">
+    <script>
+        function includeHTML(callback) {
+            const elements = document.querySelectorAll('[data-include]');
+            let loaded = 0;
+            elements.forEach(element => {
+                const file = element.getAttribute('data-include');
+                fetch(file)
+                    .then(response => response.text())
+                    .then(data => {
+                        element.innerHTML = data;
+                        loaded++;
+                        if (loaded === elements.length && callback) {
+                            callback();
+                        }
+                    });
+            });
+        }
+
+        function checkSession() {
+            fetch('../PHP/sessions.php')
+                .then(response => response.json())
+                .then(data => {
+                    const nav = document.getElementById('nav-links');
+                    const loginBtn = document.getElementById('login-btn');
+    
+                    if (data.success) {
+                        // Remove login button if exists
+                        if (loginBtn) loginBtn.remove();
+                        // Add user dropdown
+                        const userMenu = document.createElement('div');
+                        userMenu.innerHTML = `
+                            <div class="user-dropdown">
+                                <a href="#">Hi, ${data.username}</a>
+                                <div class="dropdown-content">
+                                    <a href="guest_dashboard.html">Profile</a>
+                                    <a href="#" id="headerLogout">Log out</a>
+                                </div>
+                            </div>
+                        `;
+                        nav.appendChild(userMenu);
+    
+                        document.getElementById('headerLogout').addEventListener('click', logoutUser);
+                    } else {
+                        // Add login if it's not there
+                        if (!loginBtn) {
+                            const loginLink = document.createElement('a');
+                            loginLink.href = "login.html";
+                            loginLink.id = "login-btn";
+                            loginLink.textContent = "Login";
+                            nav.appendChild(loginLink);
+                        }
+                    }
+                })
+                .catch(err => console.error("Session Check Error:", err));
+        }
+
+        function loadPets() {
+            fetch(`../PHP/get_pets_inbooking.php`)
+                .then(res => res.json())
+                .then(data => {
+                    const petSelect = document.getElementById("pet-id");
+                    petSelect.innerHTML = "";
+                    data.forEach(pet => {
+                        const option = document.createElement("option");
+                        option.value = pet.pet_id;
+                        option.textContent = `${pet.pet_name} (${pet.pet_type})`;
+                        petSelect.appendChild(option);
+                    });
+                });
+        }
+
+        function loadRoomsBasedOnPets() {
+            const petSelect = document.getElementById("pet-id");
+            const selectedPets = Array.from(petSelect.selectedOptions).map(opt => opt.value);
+            if (selectedPets.length === 0) return;
+
+            fetch('../PHP/get_pet_types.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ pet_ids: selectedPets })
+            })
+            .then(res => res.json())
+            .then(petTypes => {
+                const roomIdSelect = document.getElementById("room-id");
+                roomIdSelect.innerHTML = "";
+
+                fetch(`../PHP/get_rooms.php`) // This endpoint returns all rooms with their pet_type
+                    .then(res => res.json())
+                    .then(data => {
+                        data.forEach(room => {
+                            if (petTypes.includes(room.pet_type)) {
+                                const option = document.createElement("option");
+                                option.value = room.room_id;
+                                option.textContent = `Room #${room.room_id} (${room.pet_type} - ${room.room_type})`;
+                                roomIdSelect.appendChild(option);
+                            }
+                        });
+                    });
+            });
+        }
+
+        function loadAvailableRooms() {
+            const petSelect = document.getElementById("pet-id");
+            const selectedPets = Array.from(petSelect.selectedOptions).map(opt => opt.value);
+            const startDate = document.getElementById("start-date").value;
+            const endDate = document.getElementById("end-date").value;
+
+            if (selectedPets.length === 0 || !startDate || !endDate) return;
+
+            fetch('../PHP/get_available_rooms.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    pet_ids: selectedPets,
+                    start_date: startDate,
+                    end_date: endDate
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                const roomIdSelect = document.getElementById("room-id");
+                roomIdSelect.innerHTML = "";
+                if (data.length === 0) {
+                    const option = document.createElement("option");
+                    option.textContent = "No available rooms";
+                    option.disabled = true;
+                    option.selected = true;
+                    roomIdSelect.appendChild(option);
+                    return;
+                }
+
+                data.forEach(room => {
+                    const option = document.createElement("option");
+                    option.value = room.room_id;
+                    option.textContent = `Room #${room.room_id} (${room.pet_type} - ${room.room_type})`;
+                    roomIdSelect.appendChild(option);
+                });
+            });
+        }
+
+        function logoutUser(e) {
+            e.preventDefault();
+            fetch('../PHP/logout.php', { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        window.location.href = '../HTML/login.html';
+                    }
+                })
+                .catch(error => console.error("Logout Error:", error));
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+    includeHTML(() => {
+        checkSession();
+
+        document.getElementById("pet-id").addEventListener("change", () => {
+            loadAvailableRooms();
+        });
+
+        document.getElementById("start-date").addEventListener("change", () => {
+            loadAvailableRooms();
+        });
+
+        document.getElementById("end-date").addEventListener("change", () => {
+            loadAvailableRooms();
+        });
+    });
+});
+
+    </script>
+</head>
+<body>
+    <div data-include="header.html"></div>
+
+    <div id="mani">
+        <a><img src="../IMG/Book.webp" alt="bookings"></a>
+        <h1>Welcome To My World</h1>
+    </div>
+
+    <main>
+        <h2>Book a Stay for Your Pets</h2>
+        <form action="../PHP/process_booking.php" method="POST">
+            <input type="hidden" name="user_id" id="user-id">
+
+            <label for="start-date">Start Date:</label>
+            <input type="date" name="start_date" id="start-date" required>
+
+            <label for="end-date">End Date:</label>
+            <input type="date" name="end_date" id="end-date" required>
+
+            <label for="pet-id">Select Pets:</label>
+            <select name="pet_id[]" id="pet-id" multiple required></select>
+
+            <label for="room-id">Select Room:</label>
+            <select name="room_id" id="room-id" required></select>
+
+            <button type="submit">Confirm Booking</button>
+        </form>
+    </main>
+
+    <div data-include="contact.html"></div>
+    <div data-include="footer.html"></div>
+</body>
+<script src="../JS/chat_loader.js"></script>
+</html>

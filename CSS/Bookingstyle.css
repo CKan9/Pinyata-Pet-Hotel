@@ -1,0 +1,102 @@
+#mani {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;  /* Container width can be set as needed */
+    height: 500px; /* Set the height as needed */
+    border: 1px solid #ccc; /* Optional: to visualize the container */
+    overflow: hidden; /* Ensures content does not overflow the container */
+    text-align: center;
+}
+
+#mani img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Ensures the image covers the container */
+}
+
+#mani h1 {
+    position: absolute;
+    color: #B76E79;
+    font-size: 48px; /* Adjust font size as needed */
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); /* Optional: adds a shadow for better readability */
+}
+
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+#booking-form-section, #room-selection-section {
+    width: 100%;
+    padding: 20px;
+    box-sizing: border-box;
+    background-color: #f7f7f7;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    margin: 20px 0;
+}
+
+#booking-form-section h2, #room-selection-section h2 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+#booking-form, #room-selection-form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#booking-form label, #room-selection-form label {
+    margin-bottom: 5px;
+    text-align: left;
+    width: 100%;
+}
+
+#booking-form input, #room-selection-form input {
+    margin-bottom: 15px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+    width: 100%;
+}
+
+.room-option {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.room-option img {
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    margin-bottom: 10px;
+}
+
+.room-option p {
+    margin: 0;
+    font-size: 18px;
+}
+
+.next-page-btn {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    border-radius: 5px;
+    font-size: 16px;
+    align-self: center;
+    transition: background-color 0.3s ease;
+}
+
+.next-page-btn:hover {
+    background-color: #0056b3;
+}

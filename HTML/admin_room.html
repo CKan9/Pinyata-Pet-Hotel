@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Available Rooms</title>
+    <link rel="stylesheet" href="../CSS/dashboard.css">
+</head>
+
+<body>
+    <!-- Header Include -->
+
+    <div class="container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <h2 id="userName">UserName</h2>
+            <nav>
+                <ul>
+                    <li><a href="staff_dashboard.html">Dashboard</a></li>
+                    <li><a href="admin_booking.html">Manage Bookings</a></li>
+                    <li><a href="#">Rooms</a></li>
+                    <li><a href="#" onclick="logout()">Log out</a></li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="content">
+            <h1>Available Rooms</h1>
+
+            <!-- Filter Rooms -->
+            <div class="filters">
+                <label for="searchRoomType">Room Type:</label>
+                    <select id="searchRoomType">
+                        <option value="">All</option>
+                    </select>
+
+                    <label for="searchPetType">Pet Type:</label>
+                    <select id="searchPetType">
+                        <option value="">All</option>
+                    </select>
+
+
+                <button onclick="loadRooms()">Search</button>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Room ID</th>
+                        <th>Type</th>
+                        <th>Description</th>
+                        <th>Capacity</th>
+                        <th>Price/Day</th>
+                        <th>Availability</th>
+                        <th>Pet Type</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="roomTableBody"></tbody>
+            </table>
+        </main>
+    </div>
+
+    <!-- Footer Include -->
+    <div data-include="footer.html"></div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            includeHTML(() => {
+                checkSession();
+                loadFilterOptions(); // <-- load dropdown options
+                loadRooms();
+                bindLogoutButton();
+            });
+        });
+
+        function includeHTML(callback) {
+            const includes = document.querySelectorAll('[data-include]');
+            let loaded = 0;
+
+            includes.forEach(element => {
+                fetch(element.getAttribute('data-include'))
+                    .then(response => response.text())
+                    .then(data => {
+                        element.innerHTML = data;
+                        loaded++;
+                        if (loaded === includes.length && callback) callback();
+                    })
+                    .catch(err => console.error('Error loading file:', err));
+            });
+        }
+
+        function checkSession() {
+            fetch('../PHP/sessions.php')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        document.getElementById('userName').textContent = data.username || "Staff";
+                    } else {
+                        window.location.href = '/PT/HTML/login.html';
+                    }
+                })
+                .catch(error => console.error('Session Fetch Error:', error));
+        }
+
+        function loadRooms() {
+            const roomType = document.getElementById('searchRoomType').value;
+            const petType = document.getElementById('searchPetType').value;
+
+            const params = new URLSearchParams();
+            if (roomType) params.append('room_type', roomType);
+            if (petType) params.append('pet_type', petType);
+
+            fetch(`../PHP/get_all_rooms.php?${params.toString()}`)
+                .then(response => response.json())
+                .then(data => {
+                    const roomTable = document.getElementById('roomTableBody');
+                    roomTable.innerHTML = '';
+                    if (data.success) {
+                        data.rooms.forEach(room => {
+                            roomTable.innerHTML += `
+                                <tr>
+                                    <td>${room.room_id}</td>
+                                    <td>${room.room_type}</td>
+                                    <td>${room.description}</td>
+                                    <td>${room.capacity}</td>
+                                    <td>RM ${parseFloat(room.price_per_day).toFixed(2)}</td>
+                                    <td>${room.availability}</td>
+                                    <td>${room.pet_type}</td>
+                                    <td><a href="edit_room.html?room_id=${room.room_id}" class="edit-btn">✎</a></td>
+                                </tr>
+                            `;
+                        });
+                    } else {
+                        roomTable.innerHTML = '<tr><td colspan="8">No rooms found.</td></tr>';
+                    }
+                })
+                .catch(error => console.error("Room Fetch Error:", error));
+        }
+
+
+        function loadFilterOptions() {
+            fetch('../PHP/get_room_filters.php')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const roomSelect = document.getElementById('searchRoomType');
+                        const petSelect = document.getElementById('searchPetType');
+
+                        data.room_types.forEach(type => {
+                            const option = document.createElement('option');
+                            option.value = type;
+                            option.textContent = type;
+                            roomSelect.appendChild(option);
+                        });
+
+                        data.pet_types.forEach(type => {
+                            const option = document.createElement('option');
+                            option.value = type;
+                            option.textContent = type;
+                            petSelect.appendChild(option);
+                        });
+                    } else {
+                        console.error("Failed to load filter options:", data.error);
+                    }
+                })
+                .catch(error => console.error("Filter Fetch Error:", error));
+        }
+
+
+        function logout() {
+            fetch('../PHP/logout.php')
+                .then(() => window.location.href = '/PT/HTML/login.html')
+                .catch(err => console.error("Logout error:", err));
+        }
+    </script>
+
+    <script src="../JS/chat_loader.js"></script>
+</body>
+
+</html>

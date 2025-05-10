@@ -1,0 +1,23 @@
+Array
+(
+    [pet_name] => Hua Hua
+    [pet_type] => Dog
+    [breed] => Golden Hound
+    [age] => 4
+    [special_notes] => 
+    [existing_picture] => ../uploads/../uploads/OIP (2).jpeg
+    [pet_id] => 11
+)
+Array
+(
+    [pet_picture] => Array
+        (
+            [name] => OIP (1).jpeg
+            [full_path] => OIP (1).jpeg
+            [type] => image/jpeg
+            [tmp_name] => C:\wamp64\tmp\php9DF2.tmp
+            [error] => 0
+            [size] => 63740
+        )
+
+)

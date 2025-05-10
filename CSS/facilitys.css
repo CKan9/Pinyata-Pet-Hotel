@@ -1,0 +1,107 @@
+/* General styling for the page */
+body {
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+}
+
+/* Container for the facility details */
+#facility-details-container {
+    padding: 20px;
+    max-width: 800px;
+    margin: 0 auto;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Facility details styling */
+.facility-details {
+    margin-bottom: 20px;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.facility-details h2 {
+    font-size: 2em;
+    margin-bottom: 0.5em;
+    color: #333;
+}
+
+.facility-details img {
+    max-width: 100%;
+    border-radius: 8px;
+    margin-bottom: 1em;
+}
+
+.facility-details p {
+    font-size: 1.1em;
+    color: #666;
+    margin-bottom: 1.5em;
+}
+
+.facility-details h3 {
+    font-size: 1.5em;
+    margin-top: 1em;
+    color: #333;
+}
+
+.facility-details ul {
+    list-style-type: disc;
+    padding-left: 20px;
+    color: #666;
+}
+
+.facility-details ul li {
+    margin-bottom: 0.5em;
+}
+
+/* Back button styling */
+.btn-back {
+    display: inline-block;
+    margin-top: 20px;
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: white;
+    text-decoration: none;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+}
+
+.btn-back:hover {
+    background-color: #0056b3;
+}
+
+/* Specific styling for the #mani section */
+#mani {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;  /* Container width can be set as needed */
+    height: 500px; /* Set the height as needed */
+    border: 1px solid #ccc; /* Optional: to visualize the container */
+    overflow: hidden; /* Ensures content does not overflow the container */
+    text-align: center;
+}
+
+#mani img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Ensures the image covers the container */
+}
+
+#mani h1 {
+    position: absolute;
+    color: rgb(255, 0, 0);
+    font-size: 48px; /* Adjust font size as needed */
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); /* Optional: adds a shadow for better readability */
+}
+
+main {
+    padding: 20px;
+}

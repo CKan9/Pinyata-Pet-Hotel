@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Staff Dashboard</title>
+    <link rel="stylesheet" href="../CSS/dashboard.css">
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            includeHTML();
+            loadSession();
+            loadUsers();
+        });
+
+        function includeHTML() {
+            document.querySelectorAll('[data-include]').forEach(element => {
+                let file = element.getAttribute('data-include');
+                fetch(file)
+                    .then(response => response.text())
+                    .then(data => element.innerHTML = data)
+                    .catch(err => console.error('Error loading file:', err));
+            });
+        }
+
+        function loadSession() {
+            fetch('../PHP/sessions.php')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('usernameDisplay').value = data.username || "N/A";
+                    document.getElementById('emailDisplay').value = data.email || "N/A";
+                } else {
+                    window.location.href = '/PT/HTML/login.html';
+                }
+            })
+            .catch(error => console.error('Session Fetch Error:', error));
+        }
+
+        function loadUsers() {
+            fetch('../PHP/get_users.php')
+            .then(response => response.json())
+            .then(data => {
+                if (!data.success) {
+                    console.error("Error fetching users:", data.message);
+                    return;
+                }
+
+            let tableBody = document.getElementById('userTableBody');
+            tableBody.innerHTML = '';
+
+            data.data.forEach(user => {
+                let row = `
+                    <tr>
+                        <td>${user.user_id}</td>
+                        <td>${user.username}</td>
+                        <td>${user.email}</td>
+                        <td>${user.phone}</td>
+                        <td>
+                            <button onclick="editUser(${user.user_id})">✎</button>
+                            <button onclick="deleteUser(${user.user_id})">Delete</button>
+                        </td>
+                    </tr>`;
+                tableBody.innerHTML += row;
+            });
+        })
+        .catch(error => console.error('Error loading users:', error));
+        }
+
+        function editUser(userId) {
+            // Navigate to the edit user page with the user ID as a query parameter
+            window.location.href = `edit_user.html?id=${userId}`;
+        }
+
+        function deleteUser(userId) {
+            if (confirm("Are you sure you want to delete this user?")) {
+                fetch('../PHP/delete_user.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id: userId })
+                }).then(response => response.json())
+                .then(data => {
+                    alert(data.message);
+                    loadUsers();
+                }).catch(error => console.error('Error deleting user:', error));
+            }
+        }
+
+        function logout() {
+            fetch('../PHP/logout.php')
+                .then(() => window.location.href = '/PT/HTML/login.html')
+                .catch(err => console.error("Logout error:", err));
+        }
+    </script>
+</head>
+<body>
+
+    <div class="container">
+        <aside class="sidebar">
+            <h2>Username</h2>
+            <nav>
+                <ul>
+                    <li><a href="#">Dashboard</a></li>
+                    <li><a href="admin_booking.html">Manage Bookings</a></li>
+                    <li><a href="admin_room.html">Rooms</a></li>
+                    <li><a href="#" onclick="logout()">Log out</a></li>
+                </ul>
+            </nav>
+        </aside>
+        <main class="content">
+            <div class="profile-box">
+                <label>Username:</label>
+                <input type="text" id="usernameDisplay" readonly>
+                <label>Email:</label>
+                <input type="text" id="emailDisplay" readonly>
+            </div>
+            <div class="user-table">
+                <h2>Manage Users</h2>
+                <table border="1">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Username</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="userTableBody">
+                        <!-- Users will be loaded dynamically -->
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+    <div data-include="contact.html"></div>
+    <div data-include="footer.html"></div>
+</body>
+<script src="../JS/chat_loader.js"></script>
+</html>

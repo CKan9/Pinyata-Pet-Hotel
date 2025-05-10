@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Website</title>
+    <link rel="stylesheet" href="../CSS/styles.css">
+    <script>
+        // Include function stays as-is
+        function includeHTML(callback) {
+            let elements = document.querySelectorAll('[data-include]');
+            let loaded = 0;
+            elements.forEach(element => {
+                let file = element.getAttribute('data-include');
+                fetch(file)
+                    .then(response => response.text())
+                    .then(data => {
+                        element.innerHTML = data;
+                        loaded++;
+                        if (loaded === elements.length && callback) {
+                            callback();
+                        }
+                    })
+                    .catch(err => {
+                        console.error('Error loading file:', err);
+                    });
+            });
+        }
+    
+        // Session check inside every page without external file
+        function checkSession() {
+            fetch('../PHP/sessions.php')
+                .then(response => response.json())
+                .then(data => {
+                    const nav = document.getElementById('nav-links');
+                    const loginBtn = document.getElementById('login-btn');
+    
+                    if (data.success) {
+                        // Remove login button if exists
+                        if (loginBtn) loginBtn.remove();
+                        // Add user dropdown
+                        const userMenu = document.createElement('div');
+                        userMenu.innerHTML = `
+                            <div class="user-dropdown">
+                                <a href="#">Hi, ${data.username}</a>
+                                <div class="dropdown-content">
+                                    <a href="guest_dashboard.html">Profile</a>
+                                    <a href="#" id="headerLogout">Log out</a>
+                                </div>
+                            </div>
+                        `;
+                        nav.appendChild(userMenu);
+    
+                        document.getElementById('headerLogout').addEventListener('click', logoutUser);
+                    } else {
+                        // Add login if it's not there
+                        if (!loginBtn) {
+                            const loginLink = document.createElement('a');
+                            loginLink.href = "login.html";
+                            loginLink.id = "login-btn";
+                            loginLink.textContent = "Login";
+                            nav.appendChild(loginLink);
+                        }
+                    }
+                })
+                .catch(err => console.error("Session Check Error:", err));
+        }
+    
+        function logout() {
+            fetch('../PHP/logout.php')
+                .then(() => window.location.href = '/PT/HTML/login.html')
+                .catch(err => console.error("Logout error:", err));
+        }
+    
+        // Call after DOM is ready
+        document.addEventListener('DOMContentLoaded', function () {
+            includeHTML(() => {
+                checkSession(); // Check session after header loaded
+            });
+        });
+    </script>
+    
+</head>
+<body>
+    <div data-include="header.html"></div>
+
+    <div id="mani">
+        <img id="rotating-image" src="../IMG/M1.webp" alt="Rotating Image">
+    </div>
+
+    <script src="../JS/rotatescript.js"></script>
+    <main>
+        <div id="welcome">
+            <a><img src="../IMG/Star.png" alt="Star"></a>
+            <div id="welcometext">
+                <h1>Welcome to Pinyata Pet Hotel</h1><br>
+                <a>Where every pet is treated like family! Located in the heart of [city/region], Pinyata Pet Hotel offers a cozy and playful escape for your furry companions, ensuring their stay is filled with love, care, and fun.</a>
+            </div>
+        </div>
+
+        <div id="About">
+            <div id="Abouttext">
+                <h2>About Us</h2>
+                <a>Established in [year], Pinyata Pet Hotel is dedicated to providing top-tier hospitality for pets. Our goal is to create a safe and enjoyable environment where pets feel at home while you're away. Whether it's a short stay or an extended vacation, we offer personalized care to meet your pet’s unique needs.</a>
+            </div>
+            <a><img src="../IMG/about.png" alt="break" width="900" height="900"></a>
+        </div>
+
+        <div id="Room">
+            <a><img id="rotate-room" src="../IMG/PH.webp" alt="room"></a>
+            <div id="Roomtext">
+                <h2>Our Suites</h2>
+                <a>Our pet-friendly suites are designed to provide maximum comfort and relaxation. Each suite features cozy bedding, playful toys, and ample space to stretch and roam. We also offer special care packages, including grooming services, daily walks, and pet-friendly treats.</a>
+                <br><br>
+                <a href="room.html"><button id="read-more-btn">Read More</button></a>
+            </div>
+        </div>
+    </main>
+
+    <div data-include="contact.html"></div>
+    <div data-include="footer.html"></div>
+</body>
+<script src="../JS/chat_loader.js"></script>
+</html>

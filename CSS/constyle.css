@@ -1,0 +1,83 @@
+/* Basic Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f9f9f9;
+    padding: 20px;
+}
+
+/* Contact Us Container */
+#contact-us {
+    background-color: #31708E;
+    padding: 20px;
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap; /* Allows wrap on smaller screens */
+}
+
+/* Logo */
+.logo-container img {
+    max-width: 100%;
+    height: auto;
+    width: 200px;
+}
+
+/* Contact Info */
+.contact-info {
+    flex: 1 1 300px;
+    margin: 20px;
+    color: white;
+}
+
+h2 {
+    margin-bottom: 10px;
+    color: #fff;
+}
+
+.contact-info p {
+    margin-bottom: 10px;
+}
+
+/* Address */
+#address {
+    flex: 1 1 300px;
+    margin: 20px;
+    color: white;
+}
+
+/* Social Media Icons */
+.social-media-icons a {
+    margin-right: 10px;
+}
+
+.social-media-icons img {
+    width: 30px;
+    height: 30px;
+}
+
+/* Responsive Layout */
+@media (max-width: 768px) {
+    #contact-us {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .logo-container,
+    .contact-info,
+    #address {
+        margin-bottom: 20px;
+    }
+
+    .contact-info,
+    #address {
+        flex: 1 1 100%;
+    }
+}

@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Website</title>
+    <link rel="stylesheet" href="../CSS/facilities.css">
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Load included HTML elements
+            document.querySelectorAll('[data-include]').forEach(async (el) => {
+                const file = el.getAttribute('data-include');
+                if (file) {
+                    const response = await fetch(file);
+                    if (response.ok) {
+                        el.innerHTML = await response.text();
+                        if (file === 'header.html') {
+                            checkSession(); // Call session check after header loads
+                        }
+                    } else {
+                        el.innerHTML = 'Failed to load content.';
+                    }
+                }
+            });
+        });
+    
+        // Function to check session and update the header
+        function checkSession() {
+            fetch('../PHP/sessions.php')
+                .then(response => response.json())
+                .then(data => {
+                    const nav = document.getElementById('nav-links');
+                    const loginBtn = document.getElementById('login-btn');
+    
+                    if (data.success) {
+                        if (loginBtn) loginBtn.remove(); // Remove login button if logged in
+    
+                        const userMenu = document.createElement('div');
+                        userMenu.innerHTML = `
+                            <div class="user-dropdown">
+                                <a href="#">Hi, ${data.username}</a>
+                                <div class="dropdown-content">
+                                    <a href="guest_dashboard.html">Profile</a>
+                                    <a href="#" id="headerLogout">Log out</a>
+                                </div>
+                            </div>
+                        `;
+                        nav.appendChild(userMenu);
+    
+                        document.getElementById('headerLogout').addEventListener('click', logoutUser);
+                    } else {
+                        if (!loginBtn) {
+                            const loginLink = document.createElement('a');
+                            loginLink.href = "login.html";
+                            loginLink.id = "login-btn";
+                            loginLink.textContent = "Login";
+                            nav.appendChild(loginLink);
+                        }
+                    }
+                })
+                .catch(err => console.error("Session Check Error:", err));
+        }
+    
+        function logout() {
+            fetch('../PHP/logout.php')
+                .then(() => window.location.href = '/PT/HTML/login.html')
+                .catch(err => console.error("Logout error:", err));
+        }
+    </script>
+    
+</head>
+<body>
+    <div data-include="header.html"></div>
+
+    <div id="mani">
+        <a><img src="../IMG/facilities.webp" alt="facilities"></a>
+        <h1>Facilities</h1>
+    </div>
+
+    <main>
+        <section id="facilities">
+            <h2>Facilities at Pinyata Pet Hotel</h2>
+
+            <div class="facility">
+                <ul>
+                    <li class="background-image indivi-suite"><a href="facilitys.html?facility=indivi-suite">Individual Suites</a></li>
+                    <li class="background-image indoor-play"><a href="facilitys.html?facility=indoor-play">Indoor Playground</a></li>
+                    <li class="background-image outdoor-play"><a href="facilitys.html?facility=outdoor-play">Outdoor Playground</a></li>
+                    <li class="background-image temp-control"><a href="facilitys.html?facility=temp-control">Temperature Control</a></li>
+                    <li class="background-image rfpb"><a href="facilitys.html?facility=rfpb">Regular Feeding and Potty Breaks</a></li>
+                    <li class="background-image enp"><a href="facilitys.html?facility=enp">Exercise and Playtime</a></li>
+                    <li class="background-image medical-admin"><a href="facilitys.html?facility=medical-admin">Medication Administration</a></li>
+                    <li class="background-image grooming-service"><a href="facilitys.html?facility=grooming-service">Grooming Services</a></li>
+                    <li class="background-image daycare"><a href="facilitys.html?facility=daycare">Daycare Services</a></li>
+                    <li class="background-image V-care"><a href="facilitys.html?facility=V-care">Veterinary Care</a></li>
+                </ul>
+            </div>
+        </section>
+    </main>
+
+    <div data-include="contact.html"></div>
+    <div data-include="footer.html"></div>
+</body>
+<script src="../JS/chat_loader.js"></script>
+</html>

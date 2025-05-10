@@ -1,0 +1,220 @@
+#mani {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;  /* Container width can be set as needed */
+    height: 500px; /* Set the height as needed */
+    border: 1px solid #ccc; /* Optional: to visualize the container */
+    overflow: hidden; /* Ensures content does not overflow the container */
+    text-align: center;
+}
+
+#mani img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Ensures the image covers the container */
+}
+
+#mani h1 {
+    position: absolute;
+    color: rgb(112, 177, 21);
+    font-size: 48px; /* Adjust font size as needed */
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); /* Optional: adds a shadow for better readability */
+}
+
+#dog_standart_suites {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #ccc; /* Optional: Adds a border around the whole container */
+    padding: 20px; /* Optional: Adds some padding for spacing */
+    background-color: #ffc9c9;
+    color: rgb(18, 6, 247);
+}
+
+#dog_standart_suites img {
+    max-width: 100%;
+    height: auto;
+}
+
+#dog_standart_suitestext {
+    margin-left: 20px; /* Adjust margin as needed */
+    text-align: left;
+}
+
+#dog_standart_suitestext h1 {
+    font-size: 22px; /* Adjust font size as needed */
+    color: rgb(255, 0, 0);
+}
+
+#dog_standart_suitestext h2 {
+    font-size: 18px; /* Adjust font size as needed */
+    color: rgb(253, 66, 66);
+}
+
+#dog_standart_suitestext li {
+    font-size: 16px; /* Adjust font size as needed */
+    color: rgb(251, 132, 132);
+}
+
+#dog_deluxe_suites {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #ccc; /* Optional: Adds a border around the whole container */
+    padding: 20px; /* Optional: Adds some padding for spacing */
+    background-color: #ffdcba;
+    color: rgb(18, 6, 247);
+}
+
+#dog_deluxe_suites img {
+    max-width: 100%;
+    height: auto;
+}
+
+#dog_deluxe_suitestext {
+    margin-left: 20px; /* Adjust margin as needed */
+    text-align: left;
+}
+
+#dog_deluxe_suitestext h1 {
+    font-size: 22px; /* Adjust font size as needed */
+    color: rgb(255, 123, 0);
+}
+
+#dog_deluxe_suitestext h2 {
+    font-size: 18px; /* Adjust font size as needed */
+    color: rgb(255, 123, 66);
+}
+
+#dog_deluxe_suitestext li {
+    font-size: 16px; /* Adjust font size as needed */
+    color: rgb(255, 160, 120);
+}
+
+#cat_standart_suites {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #ccc; /* Optional: Adds a border around the whole container */
+    padding: 20px; /* Optional: Adds some padding for spacing */
+    background-color: #fffdd2;
+    color: rgb(18, 6, 247);
+}
+
+#cat_standart_suites img {
+    max-width: 100%;
+    height: auto;
+}
+
+#cat_standart_suitestext {
+    margin-left: 20px; /* Adjust margin as needed */
+    text-align: left;
+}
+
+#cat_standart_suitestext h1 {
+    font-size: 22px; /* Adjust font size as needed */
+    color: rgb(242, 255, 0);
+}
+
+#cat_standart_suitestext h2 {
+    font-size: 18px; /* Adjust font size as needed */
+    color: rgb(246, 255, 66);
+}
+
+#cat_standart_suitestext li {
+    font-size: 16px; /* Adjust font size as needed */
+    color: rgb(200, 206, 91);
+}
+
+#cat_deluxe_suites {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #ccc; /* Optional: Adds a border around the whole container */
+    padding: 20px; /* Optional: Adds some padding for spacing */
+    background-color: #daffda;
+    color: rgb(18, 6, 247);
+}
+
+#cat_deluxe_suites img {
+    max-width: 100%;
+    height: auto;
+}
+
+#cat_deluxe_suitestext {
+    margin-left: 20px; /* Adjust margin as needed */
+    text-align: left;
+}
+
+#cat_deluxe_suitestext h1 {
+    font-size: 22px; /* Adjust font size as needed */
+    color: rgb(0, 255, 98);
+}
+
+#cat_deluxe_suitestext h2 {
+    font-size: 18px; /* Adjust font size as needed */
+    color: rgb(67, 255, 139);
+}
+
+#cat_deluxe_suitestext li {
+    font-size: 16px; /* Adjust font size as needed */
+    color: rgb(120, 179, 143);
+}
+
+#booking-btn {
+    background-color: #ff0000; /* Button background color */
+    color: #000000; /* Button text color */
+    border: none; /* Remove button border */
+    padding: 10px 20px; /* Adjust padding as needed */
+    font-size: 16px; /* Adjust font size as needed */
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+#booking-btn:hover {
+    background-color: #ff9007; /* Button background color on hover */
+}
+
+#booking-btn1 {
+    background-color: #ff9900; /* Button background color */
+    color: #000000; /* Button text color */
+    border: none; /* Remove button border */
+    padding: 10px 20px; /* Adjust padding as needed */
+    font-size: 16px; /* Adjust font size as needed */
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+#booking-btn1:hover {
+    background-color: #fbff07; /* Button background color on hover */
+}
+
+#booking-btn2 {
+    background-color: #eeff00; /* Button background color */
+    color: #000000; /* Button text color */
+    border: none; /* Remove button border */
+    padding: 10px 20px; /* Adjust padding as needed */
+    font-size: 16px; /* Adjust font size as needed */
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+#booking-btn2:hover {
+    background-color: #40ff00; /* Button background color on hover */
+}
+
+#booking-btn3 {
+    background-color: #40ff00; /* Button background color */
+    color: #000000; /* Button text color */
+    border: none; /* Remove button border */
+    padding: 10px 20px; /* Adjust padding as needed */
+    font-size: 16px; /* Adjust font size as needed */
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+#booking-btn3:hover {
+    background-color: #00ffff; /* Button background color on hover */
+}

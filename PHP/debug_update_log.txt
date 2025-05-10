@@ -1,0 +1,21 @@
+{
+    "pet_id": "5",
+    "user_id": 2,
+    "picture_url_final": "..\/IMG\/uploads\/67f944f5c57e1_OIP (1).jpeg",
+    "existing_picture_input": "",
+    "new_file_uploaded": "OIP (1).jpeg"
+}
+{
+    "pet_id": "5",
+    "user_id": 2,
+    "picture_url_final": "..\/IMG\/uploads\/67f9496aee981_OIP (1).jpeg",
+    "existing_picture_input": "",
+    "new_file_uploaded": "OIP (1).jpeg"
+}
+{
+    "pet_id": "13",
+    "user_id": 2,
+    "picture_url_final": "..\/IMG\/uploads\/67fa072be729e_OIP (2).jpeg",
+    "existing_picture_input": "",
+    "new_file_uploaded": "OIP (2).jpeg"
+}

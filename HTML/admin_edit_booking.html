@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Edit Booking</title>
+  <link rel="stylesheet" href="../CSS/dashboard.css" />
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      loadBookingDetails();
+      document.getElementById("updateBookingForm").addEventListener("submit", updateBooking);
+    });
+
+    function getBookingIdFromURL() {
+      const params = new URLSearchParams(window.location.search);
+      return params.get('booking_id');
+    }
+
+    function loadBookingDetails() {
+      const bookingId = getBookingIdFromURL();
+      if (!bookingId) {
+        alert('Invalid Booking ID');
+        window.location.href = 'admin_manage_user_bookings.html';
+        return;
+      }
+
+      fetch(`../PHP/get_booking_id.php?id=${bookingId}`)
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            const booking = data.booking;
+            document.getElementById('booking_id').value = booking.booking_id;
+            document.getElementById('user_id').value = booking.user_id;
+            document.getElementById('pet_id').value = booking.pet_id;
+            document.getElementById('room_id').value = booking.room_id;
+            document.getElementById('start_date').value = booking.start_date;
+            document.getElementById('end_date').value = booking.end_date;
+            document.getElementById('total_amount').value = booking.total_amount;
+            document.getElementById('booking_status').value = booking.booking_status;
+            document.getElementById('managed_by').value = booking.managed_by;
+          } else {
+            alert('Booking not found');
+            window.location.href = 'admin_manage_user_bookings.html';
+          }
+        })
+        .catch(error => console.error('Error loading booking:', error));
+    }
+
+    function updateBooking(event) {
+      event.preventDefault();
+
+      const formData = new FormData(document.getElementById("updateBookingForm"));
+
+      fetch('../PHP/update_booking.php', {
+        method: 'POST',
+        body: formData
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          alert('Booking updated successfully!');
+          window.location.href = 'admin_manage_user_bookings.html';
+        } else {
+          alert('Failed to update booking: ' + data.message);
+        }
+      })
+      .catch(error => console.error('Error updating booking:', error));
+    }
+  </script>
+</head>
+<body>
+  <div class="container">
+    <aside class="sidebar">
+      <h2>Admin</h2>
+      <nav>
+        <ul>
+            <li><a href="staff_dashboard.html">Dashboard</a></li>
+            <li><a href="admin_booking.html">Manage Bookings</a></li>
+            <li><a href="admin_room.html">Rooms</a></li>
+            <li><a href="#" onclick="logout()">Log out</a></li>
+        </ul>
+      </nav>
+    </aside>
+
+    <main class="content">
+      <h2>Edit Booking</h2>
+      <form id="updateBookingForm">
+        <input type="hidden" id="booking_id" name="booking_id" />
+        <p><strong>User ID:</strong> <input type="text" id="user_id" name="user_id" readonly /></p>
+        <p><strong>Pet ID:</strong> <input type="text" id="pet_id" name="pet_id" readonly /></p>
+        <p><strong>Room ID:</strong> <input type="number" id="room_id" name="room_id" required /></p>
+        <p><strong>Check-in Date:</strong> <input type="date" id="start_date" name="start_date" required /></p>
+        <p><strong>Check-out Date:</strong> <input type="date" id="end_date" name="end_date" required /></p>
+        <p><strong>Total Amount (RM):</strong> <input type="number" id="total_amount" name="total_amount" step="0.01" required /></p>
+        <p><strong>Status:</strong>
+          <select id="booking_status" name="booking_status" required>
+            <option value="Pending">Pending</option>
+            <option value="Paid">Paid</option>
+            <option value="Cancelled">Cancelled</option>
+            <option value="Completed">Completed</option>
+          </select>
+        </p>
+        <p><strong>Managed By (Staff ID):</strong> <input type="number" id="managed_by" name="managed_by" /></p>
+        <br />
+        <button type="submit">Save Changes</button>
+        <button type="button" onclick="window.location.href='admin_manage_user_bookings.html'">Cancel</button>
+      </form>
+    </main>
+  </div>
+
+  <script>
+    function logout() {
+            fetch('../PHP/logout.php')
+                .then(() => window.location.href = '/PT/HTML/login.html')
+                .catch(err => console.error("Logout error:", err));
+        }
+  </script>
+</body>
+</html>

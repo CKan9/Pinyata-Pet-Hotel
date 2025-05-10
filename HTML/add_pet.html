@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Pet</title>
+    <link rel="stylesheet" href="../CSS/dashboard.css">
+</head>
+
+<body>
+    <!-- Header Include -->
+    <div data-include="header.html"></div>
+
+    <div id="mani">
+        <img src="../IMG/hooray.jpg" alt="dashboard">
+        <h1>Welcome To Your Dashboard</h1>
+    </div>
+
+    <div class="container">
+        <aside class="sidebar">
+            <h2 id="userName">UserName</h2>
+            <nav>
+                <ul>
+                    <li><a href="profile.html">Profile</a></li>
+                    <li><a href="userbooking.html">Booking</a></li>
+                    <li><a href="pets.html">Pets</a></li>
+                    <li><a href="#" id="logoutBtn">Log out</a></li>
+                </ul>
+            </nav>
+        </aside>
+
+        <main class="content">
+            <h2>Add a New Pet</h2>
+            <form id="addPetForm" enctype="multipart/form-data">
+                <label>Pet Name:</label>
+                <input type="text" id="petName" name="pet_name" required>
+
+                <label>Pet Type:</label>
+                <select id="petType" name="pet_type" required>
+                    <option value="Dog">Dog</option>
+                    <option value="Cat">Cat</option>
+                    <option value="Bird">Bird</option>
+                    <option value="Other">Other</option>
+                </select>
+
+                <label>Breed:</label>
+                <input type="text" id="breed" name="breed" required>
+
+                <label>Age:</label>
+                <input type="number" id="age" name="age" min="0" required>
+
+                <label>Special Notes:</label>
+                <textarea id="specialNotes" name="special_notes"></textarea>
+
+                <label>Upload Pet Picture:</label>
+                <input type="file" id="petPicture" name="pet_picture" accept="image/*">
+                <img id="imagePreview" src="" alt="Pet Picture" style="display:none; max-width: 200px; margin-top: 10px;">
+
+                <button type="submit" id="submitButton">Add Pet</button>
+                <button type="button" id="backButton">Back</button>
+            </form>
+        </main>
+    </div>
+
+    <script>
+document.addEventListener("DOMContentLoaded", function () {
+    checkSession();           // Check session
+    bindEventListeners();     // Bind button clicks
+    loadPetData();            // If editing, pre-fill form
+});
+
+// Check if user is logged in
+function checkSession() {
+            fetch('../PHP/sessions.php')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Update username display
+                        const userNameElement = document.getElementById('userName');
+                        if (userNameElement) userNameElement.textContent = data.username || "UserName";
+
+                        // Modify navigation UI
+                        const nav = document.getElementById('nav-links');
+                        const loginBtn = document.getElementById('login-btn');
+                        if (loginBtn) loginBtn.remove();
+
+                        // Create user dropdown menu
+                        const userMenu = document.createElement('div');
+                        userMenu.innerHTML = `
+                            <div class="user-dropdown">
+                                <a href="#">Hi, ${data.username}</a>
+                                <div class="dropdown-content">
+                                    <a href="guest_dashboard.html">Profile</a>
+                                    <a href="#" id="headerLogout">Log out</a>
+                                </div>
+                            </div>
+                        `;
+                        nav.appendChild(userMenu);
+
+                        // Bind logout functionality
+                        document.getElementById('headerLogout').addEventListener('click', logoutUser);
+                    } else {
+                        // Redirect if session is not valid
+                        window.location.href = '../HTML/login.html';
+                    }
+                })
+                .catch(error => console.error('Session Fetch Error:', error));
+        }
+
+// Button Events
+function bindEventListeners() {
+    document.getElementById('logoutBtn').addEventListener('click', function (e) {
+        e.preventDefault();
+        fetch('../PHP/logout.php', { method: 'POST' })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) window.location.href = '../HTML/login.html';
+            })
+            .catch(err => console.error("Logout Error:", err));
+    });
+
+    document.getElementById('backButton').addEventListener('click', () => window.history.back());
+
+    // Preview selected image
+    document.getElementById('petPicture').addEventListener('change', function (e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const imgPreview = document.getElementById('imagePreview');
+                imgPreview.src = e.target.result;
+                imgPreview.style.display = "block";
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    // Form submit: Add or Update Pet
+    document.getElementById('addPetForm').addEventListener('submit', function (event) {
+    event.preventDefault();
+
+    const petId = new URLSearchParams(window.location.search).get('pet_id');
+    const url = petId ? '../PHP/update_pet.php' : '../PHP/add_pet.php';
+    const formData = new FormData(this);
+
+    // 👇 Safely append pet_id
+    if (petId) {
+        formData.append('pet_id', petId);
+    }
+
+    // 👇 Handle existing picture
+    const fileInput = document.getElementById('petPicture');
+    const existingPictureInput = document.getElementById('existingPicture');
+    const existingPicture = existingPictureInput ? existingPictureInput.value : '';
+
+    if (existingPicture) {
+        formData.append('existing_picture', existingPicture);
+    }
+
+
+    fetch(url, {
+        method: 'POST',
+        body: formData
+    })
+    .then(res => res.json())
+    .then(data => {
+        alert(data.message);
+        if (data.success) {
+            window.location.href = "pets.html";
+        }
+    })
+    .catch(err => console.error("Submit Error:", err));
+});
+
+}
+
+// If editing, load data into form
+function loadPetData() {
+    const petId = new URLSearchParams(window.location.search).get('pet_id');
+    if (!petId) return;
+
+    fetch(`../PHP/get_pet_by_id.php?pet_id=${petId}`)
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                const pet = data.pet;
+                document.querySelector("h2").textContent = `Edit Pet: ${pet.pet_name}`;
+                document.getElementById('submitButton').textContent = "Update Pet";
+
+                document.getElementById('petName').value = pet.pet_name;
+                document.getElementById('petType').value = pet.pet_type;
+                document.getElementById('breed').value = pet.breed;
+                document.getElementById('age').value = pet.age;
+                document.getElementById('specialNotes').value = pet.special_notes || "";
+
+                // Set existing picture URL if available
+                if (!document.getElementById('existingPicture')) {
+                    const hiddenInput = document.createElement('input');
+                    hiddenInput.type = 'hidden';
+                    hiddenInput.name = 'existing_picture';
+                    hiddenInput.id = 'existingPicture';
+                    document.getElementById('addPetForm').appendChild(hiddenInput);
+                }
+                document.getElementById('existingPicture').value = pet.picture_url;
+
+                // Display existing picture if available
+                if (pet.picture_url) {
+                    const img = document.getElementById('imagePreview');
+                    img.src = pet.picture_url;
+                    img.style.display = "block";
+                }
+            } else {
+                console.error("Load Error:", data.message);
+            }
+        })
+        .catch(err => console.error("Fetch Error:", err));
+}
+</script>
+</body>
+<script src="../JS/chat_loader.js"></script>
+</html>

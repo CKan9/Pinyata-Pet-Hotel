@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us - My Pet Hotel</title>
+    <link rel="stylesheet" href="../CSS/aboutus.css">
+    <script>
+        // Include function stays as-is
+        function includeHTML(callback) {
+            let elements = document.querySelectorAll('[data-include]');
+            let loaded = 0;
+            elements.forEach(element => {
+                let file = element.getAttribute('data-include');
+                fetch(file)
+                    .then(response => response.text())
+                    .then(data => {
+                        element.innerHTML = data;
+                        loaded++;
+                        if (loaded === elements.length && callback) {
+                            callback();
+                        }
+                    })
+                    .catch(err => {
+                        console.error('Error loading file:', err);
+                    });
+            });
+        }
+    
+        // Session check inside every page without external file
+        function checkSession() {
+            fetch('../PHP/sessions.php')
+                .then(response => response.json())
+                .then(data => {
+                    const nav = document.getElementById('nav-links');
+                    const loginBtn = document.getElementById('login-btn');
+    
+                    if (data.success) {
+                        // Remove login button if exists
+                        if (loginBtn) loginBtn.remove();
+                        // Add user dropdown
+                        const userMenu = document.createElement('div');
+                        userMenu.innerHTML = `
+                            <div class="user-dropdown">
+                                <a href="#">Hi, ${data.username}</a>
+                                <div class="dropdown-content">
+                                    <a href="guest_dashboard.html">Profile</a>
+                                    <a href="#" id="headerLogout">Log out</a>
+                                </div>
+                            </div>
+                        `;
+                        nav.appendChild(userMenu);
+    
+                        document.getElementById('headerLogout').addEventListener('click', logoutUser);
+                    } else {
+                        // Add login if it's not there
+                        if (!loginBtn) {
+                            const loginLink = document.createElement('a');
+                            loginLink.href = "login.html";
+                            loginLink.id = "login-btn";
+                            loginLink.textContent = "Login";
+                            nav.appendChild(loginLink);
+                        }
+                    }
+                })
+                .catch(err => console.error("Session Check Error:", err));
+        }
+    
+        function logoutUser(e) {
+            e.preventDefault();
+            fetch('../PHP/logout.php', { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        window.location.href = '../HTML/login.html';
+                    }
+                })
+                .catch(error => console.error("Logout Error:", error));
+        }
+    
+        // Call after DOM is ready
+        document.addEventListener('DOMContentLoaded', function () {
+            includeHTML(() => {
+                checkSession(); // Check session after header loaded
+            });
+        });
+    </script>
+</head>
+<body>
+    <div data-include="header.html"></div>
+
+    <div id="mani">
+        <a><img src="../IMG/aboutus.webp" alt="About Us"></a>
+        <h1>About Us</h1>
+    </div>
+
+    <main>
+        <section class="about-us">
+            <div class="content">
+                <h2>Our Story</h2>
+                <p>Welcome to <strong>My Pet Hotel</strong>, where we are dedicated to providing the best care and comfort for your beloved pets. Our journey began in [Year] with a passion for animals and a commitment to creating a safe, loving environment where pets can thrive during their stay.</p>
+
+                <h2>Our Mission</h2>
+                <p>At My Pet Hotel, our mission is to offer exceptional pet care through personalized services, ensuring pets feel at home even when they are away from their owners. We are dedicated to creating a fun, healthy, and stress-free experience for every pet under our care.</p>
+
+                <h2>Our Team</h2>
+                <div class="team">
+                    <div class="team-member">
+                        <img src="../IMG/team-member1.jpg" alt="John Doe">
+                        <h3>John Doe</h3>
+                        <p>Pet Hotel Manager</p>
+                    </div>
+                    <div class="team-member">
+                        <img src="../IMG/team-member2.jpg" alt="Jane Smith">
+                        <h3>Jane Smith</h3>
+                        <p>Lead Groomer</p>
+                    </div>
+                    <div class="team-member">
+                        <img src="../IMG/team-member3.jpg" alt="Sam Brown">
+                        <h3>Sam Brown</h3>
+                        <p>Pet Care Specialist</p>
+                    </div>
+                </div>
+
+                <h2>Why Choose Us?</h2>
+                <p>We understand that leaving your pet behind can be difficult. That’s why we go the extra mile to make every pet feel loved and cared for. Whether it’s a short weekend stay or a longer vacation, our experienced team ensures that each pet receives the attention and care they deserve.</p>
+
+                <h2>Contact Us</h2>
+                <p>If you have any questions or would like to book a stay, feel free to reach out to us at <strong>[Contact Information]</strong>. We look forward to welcoming you and your pets!</p>
+            </div>
+        </section>
+    </main>
+
+    <div data-include="contact.html"></div>
+    <div data-include="footer.html"></div>
+</body>
+<script src="../JS/chat_loader.js"></script>
+</html>

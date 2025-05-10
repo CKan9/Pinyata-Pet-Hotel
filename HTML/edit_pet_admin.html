@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Pet (Admin)</title>
+    <link rel="stylesheet" href="../CSS/dashboard.css">
+</head>
+<body>
+    <div data-include="header.html"></div>
+
+    <div class="container">
+        <aside class="sidebar">
+            <h2>Admin</h2>
+            <nav>
+                <ul>
+                    <li><a href="staff_dashboard.html">Dashboard</a></li>
+                    <li><a href="manage_bookings.html">Manage Bookings</a></li>
+                    <li><a href="admin_room.html">Rooms</a></li>
+                    <li><a href="#" onclick="logout()">Log out</a></li>
+                </ul>
+            </nav>
+        </aside>
+
+        <main class="content">
+            <h2>Edit Pet Details</h2>
+            <form id="editPetForm" enctype="multipart/form-data">
+                <label>Pet Name:</label>
+                <input type="text" id="petName" name="pet_name" required>
+
+                <label>Pet Type:</label>
+                <select id="petType" name="pet_type" required>
+                    <option value="Dog">Dog</option>
+                    <option value="Cat">Cat</option>
+                    <option value="Bird">Bird</option>
+                    <option value="Other">Other</option>
+                </select>
+
+                <label>Breed:</label>
+                <input type="text" id="breed" name="breed" required>
+
+                <label>Age:</label>
+                <input type="number" id="age" name="age" min="0" required>
+
+                <label>Special Notes:</label>
+                <textarea id="specialNotes" name="special_notes"></textarea>
+
+                <label>Upload New Picture (optional):</label>
+                <input type="file" id="petPicture" name="pet_picture" accept="image/*">
+                <img id="imagePreview" src="" alt="Pet Picture" style="display:none; max-width: 200px; margin-top: 10px;">
+
+                <input type="hidden" id="existingPicture" name="existing_picture">
+
+                <button type="submit">Update Pet</button>
+                <button type="button" onclick="window.history.back()">Back</button>
+            </form>
+        </main>
+    </div>
+
+    <div data-include="footer.html"></div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            loadPetData();
+
+            document.getElementById("petPicture").addEventListener("change", function (e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        const img = document.getElementById("imagePreview");
+                        img.src = e.target.result;
+                        img.style.display = "block";
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            document.getElementById("editPetForm").addEventListener("submit", function (event) {
+                event.preventDefault();
+                const petId = new URLSearchParams(window.location.search).get("pet_id");
+                const formData = new FormData(this);
+                formData.append("pet_id", petId);
+
+                fetch("../PHP/update_pet_by_admin.php", {
+                    method: "POST",
+                    body: formData
+                })
+                .then(res => res.json())
+                .then(data => {
+                    alert(data.message);
+                    if (data.success) {
+                        window.location.href = "staff_dashboard.html";
+                    }
+                })
+                .catch(err => console.error("Update Error:", err));
+            });
+        });
+
+        function loadPetData() {
+            const petId = new URLSearchParams(window.location.search).get("pet_id");
+            if (!petId) {
+                alert("Invalid Pet ID");
+                window.location.href = "staff_dashboard.html";
+                return;
+            }
+
+            fetch(`../PHP/get_pet_by_id.php?pet_id=${petId}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    const pet = data.pet;
+                    document.getElementById("petName").value = pet.pet_name;
+                    document.getElementById("petType").value = pet.pet_type;
+                    document.getElementById("breed").value = pet.breed;
+                    document.getElementById("age").value = pet.age;
+                    document.getElementById("specialNotes").value = pet.special_notes || "";
+                    document.getElementById("existingPicture").value = pet.picture_url;
+
+                    if (pet.picture_url) {
+                        const img = document.getElementById("imagePreview");
+                        img.src = pet.picture_url;
+                        img.style.display = "block";
+                    }
+                } else {
+                    alert("Pet not found");
+                    window.location.href = "staff_dashboard.html";
+                }
+            })
+            .catch(err => console.error("Fetch Error:", err));
+        }
+
+        function logout() {
+            fetch('../PHP/logout.php')
+                .then(() => window.location.href = '/PT/HTML/login.html')
+                .catch(err => console.error("Logout error:", err));
+        }
+    </script>
+    <script src="../JS/chat_loader.js"></script>
+</body>
+</html>

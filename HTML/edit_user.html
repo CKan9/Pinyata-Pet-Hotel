@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit User</title>
+    <link rel="stylesheet" href="../CSS/dashboard.css">
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            loadUserDetails();
+
+            document.getElementById('backButton').addEventListener('click', function() {
+                window.location.href = 'staff_dashboard.html';
+            });
+        });
+
+        function getUserIdFromURL() {
+            const params = new URLSearchParams(window.location.search);
+            return params.get('id');
+        }
+
+        function loadUserDetails() {
+            const userId = getUserIdFromURL();
+            if (!userId) {
+                alert('Invalid User ID');
+                window.location.href = 'staff_dashboard.html';
+                return;
+            }
+
+            fetch(`/PT/PHP/get_user_id.php?id=${userId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('username').value = data.user.username;
+                    document.getElementById('email').value = data.user.email;
+                    document.getElementById('phone').value = data.user.phone;
+                    document.getElementById('password').value = data.user.password;
+                    loadPetDetails(userId);
+                } else {
+                    alert('User not found');
+                    window.location.href = 'staff_dashboard.html';
+                }
+            })
+            .catch(error => console.error('Error loading user details:', error));
+        }
+
+        function loadPetDetails(userId) {
+            fetch(`/PT/PHP/get_pets.php?user_id=${userId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    let tableBody = document.getElementById('petTableBody');
+                    tableBody.innerHTML = '';
+
+                    data.pets.forEach((pet, index) => {
+                        let row = `
+                            <tr>
+                                <td>${index + 1}</td>
+                                <td><img src="${pet.picture_url}" alt="Pet" width="40"></td>
+                                <td>${pet.pet_name}</td>
+                                <td>${pet.pet_type}</td>
+                                <td><button class="tag-btn">New Tag</button></td>
+                                <td><button onclick="editPet(${pet.pet_id})">✏️</button></td>
+                            </tr>`;
+                        tableBody.innerHTML += row;
+                    });
+                }
+            })
+            .catch(error => console.error('Error loading pet details:', error));
+        }
+
+        function updateUser() {
+            const userId = getUserIdFromURL();
+            let userData = {
+                id: userId,
+                username: document.getElementById('username').value,
+                email: document.getElementById('email').value,
+                phone: document.getElementById('phone').value,
+                password: document.getElementById('password').value
+            };
+
+            fetch('/PT/PHP/update_user.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(userData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);
+                if (data.success) {
+                    window.location.href = 'staff_dashboard.html';
+                }
+            })
+            .catch(error => console.error('Error updating user:', error));
+        }
+
+        function editPet(petId) {
+            window.location.href = `edit_pet_admin.html?pet_id=${petId}`;
+        }
+
+        function logout() {
+            fetch('../PHP/logout.php')
+                .then(() => window.location.href = '/PT/HTML/login.html')
+                .catch(err => console.error("Logout error:", err));
+        }
+        
+    </script>
+</head>
+<body>
+    <div data-include="header.html"></div>
+
+    <div class="container">
+        <aside class="sidebar">
+            <h2>Admin</h2>
+            <nav>
+                <ul>
+                    <li><a href="staff_dashboard.html">Dashboard</a></li>
+                    <li><a href="manage_bookings.html">Manage Bookings</a></li>
+                    <li><a href="admin_room.html">Rooms</a></li>
+                    <li><a href="#" onclick="logout()">Log out</a></li>
+                </ul>
+            </nav>
+        </aside>
+
+        <main class="content">
+            <h2>Edit User</h2>
+            <form onsubmit="event.preventDefault(); updateUser();">
+                <label>Username:</label>
+                <input type="text" id="username">
+                
+                <label>Email:</label>
+                <input type="text" id="email">
+
+                <label>Phone:</label>
+                <input type="text" id="phone">
+
+                <label>Password:</label>
+                <input type="password" id="password">
+
+                <button type="submit">Update</button>
+                <button type="button" id="backButton">Back</button>
+            </form>
+
+            <h2>User's Pets</h2>
+            <table border="1">
+                <thead>
+                    <tr>
+                        <th>No</th>
+                        <th>Pet</th>
+                        <th>Name</th>
+                        <th>Type</th>
+                        <th>Tag</th>
+                        <th>Icon</th>
+                    </tr>
+                </thead>
+                <tbody id="petTableBody">
+                    <!-- Pet data will load dynamically -->
+                </tbody>
+            </table>
+        </main>
+    </div>
+
+    <div data-include="footer.html"></div>
+</body>
+<script src="../JS/chat_loader.js"></script>
+</html>

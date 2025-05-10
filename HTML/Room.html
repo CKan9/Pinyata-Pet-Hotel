@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Website</title>
+    <link rel="stylesheet" href="../CSS/Roomstyles.css">
+    <script>
+        // Include function stays as-is
+        function includeHTML(callback) {
+            let elements = document.querySelectorAll('[data-include]');
+            let loaded = 0;
+            elements.forEach(element => {
+                let file = element.getAttribute('data-include');
+                fetch(file)
+                    .then(response => response.text())
+                    .then(data => {
+                        element.innerHTML = data;
+                        loaded++;
+                        if (loaded === elements.length && callback) {
+                            callback();
+                        }
+                    })
+                    .catch(err => {
+                        console.error('Error loading file:', err);
+                    });
+            });
+        }
+    
+        // Session check inside every page without external file
+        function checkSession() {
+            fetch('../PHP/sessions.php')
+                .then(response => response.json())
+                .then(data => {
+                    const nav = document.getElementById('nav-links');
+                    const loginBtn = document.getElementById('login-btn');
+    
+                    if (data.success) {
+                        // Remove login button if exists
+                        if (loginBtn) loginBtn.remove();
+                        // Add user dropdown
+                        const userMenu = document.createElement('div');
+                        userMenu.innerHTML = `
+                            <div class="user-dropdown">
+                                <a href="#">Hi, ${data.username}</a>
+                                <div class="dropdown-content">
+                                    <a href="guest_dashboard.html">Profile</a>
+                                    <a href="#" id="headerLogout">Log out</a>
+                                </div>
+                            </div>
+                        `;
+                        nav.appendChild(userMenu);
+    
+                        document.getElementById('headerLogout').addEventListener('click', logoutUser);
+                    } else {
+                        // Add login if it's not there
+                        if (!loginBtn) {
+                            const loginLink = document.createElement('a');
+                            loginLink.href = "login.html";
+                            loginLink.id = "login-btn";
+                            loginLink.textContent = "Login";
+                            nav.appendChild(loginLink);
+                        }
+                    }
+                })
+                .catch(err => console.error("Session Check Error:", err));
+        }
+    
+        function logout() {
+            fetch('../PHP/logout.php')
+                .then(() => window.location.href = '/PT/HTML/login.html')
+                .catch(err => console.error("Logout error:", err));
+        }
+    
+        // Call after DOM is ready
+        document.addEventListener('DOMContentLoaded', function () {
+            includeHTML(() => {
+                checkSession(); // Check session after header loaded
+            });
+        });
+    </script>
+</head>
+<body>
+    <div data-include="header.html"></div>
+
+    <div id="mani">
+        <a><img src="../IMG/Rooms.webp" alt="rooms"></a>
+        <h1>Rooms</h1>
+    </div>
+
+    <main>
+        <div id="dog_standart_suites">
+            <a><img src="../IMG/RDH.webp" width="700" height="700"></a>
+            <div id="dog_standart_suitestext">
+                <h1>Dog Standard Suites</h1>
+                <h2>A cozy haven for your dog with all the essentials for a comfortable stay. Our Dog Standard Suites offer:</h2>
+                <br>
+                <li>
+                    <a>Soft bedding and blankets for restful naps after a fun day of play.</a><br><br>
+                </li>
+                <li>
+                    <a>Spacious area with room to stretch, jump, and roll around.</a><br><br>
+                </li>
+                <li>
+                    <a>Daily exercise sessions and playtime with other friendly guests.</a><br><br>
+                </li>
+                <li>
+                    <a>Fresh water and premium dog food served according to your pet’s schedule.</a>
+                </li><br>
+                <a href="Booking.html"><button id="booking-btn">Book Now</button></a>
+            </div>
+        </div>
+
+        <div id="dog_deluxe_suites">
+            <div id="dog_deluxe_suitestext">
+                <h1>Dog Deluxe Suites</h1>
+                <h2>Pamper your dog with luxury and extra space in our Deluxe Suites, featuring:</h2>
+                <br>
+                <li>
+                    <a>Extra-large bed with plush cushions for ultimate relaxation.</a><br><br>
+                </li>
+                <li>
+                    <a>Personalized care, including grooming and daily walk services.</a><br><br>
+                </li>
+                <li>
+                    <a>Private play area within the suite for uninterrupted fun.</a><br><br>
+                </li>
+                <li>
+                    <a>Access to premium dog treats and toys for a memorable stay.</a><br><br>
+                </li>
+                <li>
+                    <a>Complimentary minibar stocked with refreshments and snacks for your enjoyment.</a>
+                </li><br>
+                <a href="Booking.html"><button id="booking-btn1">Book Now</button></a>
+            </div>
+            <a><img src="../IMG/DDH.webp" width="700" height="700"></a>
+        </div>
+
+        <div id="cat_standart_suites">
+            <a><img src="../IMG/RCH.webp" width="700" height="700"></a>
+            <div id="cat_standart_suitestext">
+                <h1>Cat Standart Suites</h1>
+                <h2>A calm and relaxing environment designed with your cat's comfort in mind. The Standard Suite includes:</h2>
+                <br>
+                <li>
+                    <a>Soft bedding with cozy nooks for curling up and relaxing.</a><br><br>
+                </li>
+                <li>
+                    <a>Scratching posts and toys to keep your cat entertained.</a><br><br>
+                </li>
+                <li>
+                    <a>Daily litter box cleaning and fresh water replenished throughout the day.</a><br><br>
+                </li>
+                <li>
+                    <a>Quiet surroundings to ensure your cat feels safe and stress-free.</a>
+                </li><br>
+                <a href="Booking.html"><button id="booking-btn2">Book Now</button></a>
+            </div>
+        </div>
+
+        <div id="cat_deluxe_suites">
+            <div id="cat_deluxe_suitestext">
+                <h1>Cat Deluxe Suites</h1>
+                <h2>Give your feline friend a taste of luxury with our spacious Cat Deluxe Suites, offering:</h2>
+                <br>
+                <li>
+                    <a>Large suite with climbing shelves and window views for sunbathing.</a><br><br>
+                </li>
+                <li>
+                    <a>Personalized grooming services for a sleek and shiny coat.</a><br><br>
+                </li>
+                <li>
+                    <a>Exclusive playtime with interactive toys and puzzles.</a><br><br>
+                </li>
+                <li>
+                    <a>Special diet options, including premium cat food and treats.</a>
+                </li><br>
+                <a href="Booking.html"><button id="booking-btn3">Book Now</button></a>
+            </div>
+            <a><img src="../IMG/DCH.webp" width="700" height="700"></a>
+        </div>
+    </main>
+
+    <div data-include="contact.html"></div>
+    <div data-include="footer.html"></div>
+</body>
+<script src="../JS/chat_loader.js"></script>
+</html>

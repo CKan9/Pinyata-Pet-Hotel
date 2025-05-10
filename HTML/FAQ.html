@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Pet Hotel - FAQ</title>
+    <link rel="stylesheet" href="../CSS/FAQ.css">
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Load included HTML elements
+            document.querySelectorAll('[data-include]').forEach(async (el) => {
+                const file = el.getAttribute('data-include');
+                if (file) {
+                    const response = await fetch(file);
+                    if (response.ok) {
+                        el.innerHTML = await response.text();
+                        if (file === 'header.html') {
+                            checkSession(); // Call session check after header loads
+                        }
+                    } else {
+                        el.innerHTML = 'Failed to load content.';
+                    }
+                }
+            });
+    
+            // Toggle FAQ answers
+            document.querySelectorAll('.faq-question').forEach(question => {
+                question.addEventListener('click', () => {
+                    const answer = question.nextElementSibling;
+                    answer.style.display = answer.style.display === 'block' ? 'none' : 'block';
+                });
+            });
+        });
+    
+        // Function to check session and update the header
+        function checkSession() {
+            fetch('../PHP/sessions.php')
+                .then(response => response.json())
+                .then(data => {
+                    const nav = document.getElementById('nav-links');
+                    const loginBtn = document.getElementById('login-btn');
+    
+                    if (data.success) {
+                        if (loginBtn) loginBtn.remove(); // Remove login button if logged in
+    
+                        const userMenu = document.createElement('div');
+                        userMenu.innerHTML = `
+                            <div class="user-dropdown">
+                                <a href="#">Hi, ${data.username}</a>
+                                <div class="dropdown-content">
+                                    <a href="guest_dashboard.html">Profile</a>
+                                    <a href="#" id="headerLogout">Log out</a>
+                                </div>
+                            </div>
+                        `;
+                        nav.appendChild(userMenu);
+    
+                        document.getElementById('headerLogout').addEventListener('click', logoutUser);
+                    } else {
+                        if (!loginBtn) {
+                            const loginLink = document.createElement('a');
+                            loginLink.href = "login.html";
+                            loginLink.id = "login-btn";
+                            loginLink.textContent = "Login";
+                            nav.appendChild(loginLink);
+                        }
+                    }
+                })
+                .catch(err => console.error("Session Check Error:", err));
+        }
+    
+        function logout() {
+            fetch('../PHP/logout.php')
+                .then(() => window.location.href = '/PT/HTML/login.html')
+                .catch(err => console.error("Logout error:", err));
+        }
+    </script>
+    
+</head>
+<body>
+    <div data-include="header.html"></div>
+
+    <div id="mani">
+        <a><img src="../IMG/FAQ.jpg" alt="FAQ"></a>
+        <h1>FAQ</h1>
+    </div>
+
+    <main>
+        <div id="faq-container">
+            <h1>Frequently Asked Questions</h1>
+            
+            <div class="faq-item">
+                <h2 class="faq-question">What are the check-in and check-out times?</h2>
+                <div class="faq-answer">
+                    <p>Check-in for pets is available from 9:00 AM, and check-out is by 6:00 PM. Early check-in or late check-out is subject to availability and may incur additional charges.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <h2 class="faq-question">Do you provide food for the pets?</h2>
+                <div class="faq-answer">
+                    <p>Yes, we provide high-quality pet food. However, if your pet has specific dietary requirements, you are welcome to bring their preferred food, and our staff will serve it accordingly.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <h2 class="faq-question">Are vaccinations required?</h2>
+                <div class="faq-answer">
+                    <p>Yes, all pets must be up-to-date on their vaccinations. We require proof of vaccinations, including rabies, distemper, and other core vaccines, prior to check-in.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <h2 class="faq-question">Do you offer grooming services?</h2>
+                <div class="faq-answer">
+                    <p>Yes, we offer grooming services, including bathing, nail trimming, and coat care. Grooming can be scheduled during your pet's stay or as a separate appointment.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <h2 class="faq-question">Can I bring my pet’s favorite toys or bedding?</h2>
+                <div class="faq-answer">
+                    <p>Absolutely! Bringing familiar items like toys or bedding can help your pet feel more comfortable. However, please note that we are not responsible for any loss or damage to personal items.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <h2 class="faq-question">Do you have veterinary care on-site?</h2>
+                <div class="faq-answer">
+                    <p>We work closely with a local veterinary clinic to ensure that pets receive prompt care in case of emergencies. Our staff is trained to monitor health conditions and administer medications as needed.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <h2 class="faq-question">What are your exercise and playtime arrangements?</h2>
+                <div class="faq-answer">
+                    <p>Pets enjoy daily playtime in our secure outdoor and indoor play areas. Social dogs can join group play sessions, while individual play is available for pets who prefer solitude or have special needs.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <h2 class="faq-question">Do you accommodate pets with special needs?</h2>
+                <div class="faq-answer">
+                    <p>Yes, we welcome pets with special needs. Our trained staff can administer medications, monitor conditions, and follow any specific care instructions provided by pet owners.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <h2 class="faq-question">Is there a cancellation policy?</h2>
+                <div class="faq-answer">
+                    <p>Cancellations must be made at least 24 hours before the scheduled check-in date. Cancellations made within 24 hours may incur a cancellation fee.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <h2 class="faq-question">What are your cleanliness and hygiene practices?</h2>
+                <div class="faq-answer">
+                    <p>We follow strict cleanliness protocols. Our facilities are cleaned and sanitized regularly, and all pet spaces are maintained to ensure a healthy and hygienic environment.</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div data-include="contact.html"></div>
+    <div data-include="footer.html"></div>
+</body>
+
+<script>
+    // Include HTML files
+    document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('[data-include]').forEach(async (el) => {
+            const file = el.getAttribute('data-include');
+            if (file) {
+                const response = await fetch(file);
+                if (response.ok) {
+                    el.innerHTML = await response.text();
+                } else {
+                    el.innerHTML = 'Failed to load content.';
+                }
+            }
+        });
+    });
+
+    // Toggle FAQ answers
+    document.querySelectorAll('.faq-question').forEach(question => {
+        question.addEventListener('click', () => {
+            const answer = question.nextElementSibling;
+            answer.style.display = answer.style.display === 'block' ? 'none' : 'block';
+        });
+    });
+</script>
+<script src="../JS/chat_loader.js"></script>
+</html>

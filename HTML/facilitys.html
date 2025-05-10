@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Website</title>
+    <link rel="stylesheet" href="../CSS/facilitys.css">
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Load included HTML elements
+            document.querySelectorAll('[data-include]').forEach(async (el) => {
+                const file = el.getAttribute('data-include');
+                if (file) {
+                    const response = await fetch(file);
+                    if (response.ok) {
+                        el.innerHTML = await response.text();
+                        if (file === 'header.html') {
+                            checkSession(); // Call session check after header loads
+                        }
+                    } else {
+                        el.innerHTML = 'Failed to load content.';
+                    }
+                }
+            });
+
+            loadFacilityDetails();
+        });
+
+        // Function to check session and redirect if not logged in
+        function checkSession() {
+            fetch('../PHP/sessions.php')
+                .then(response => response.json())
+                .then(data => {
+                    if (!data.success) {
+                        alert('You need to log in to access this page.');
+                        window.location.href = 'login.html'; // Redirect to login page
+                    } else {
+                        updateNavbar(data.username);
+                    }
+                })
+                .catch(err => console.error("Session Check Error:", err));
+        }
+
+        // Function to update navbar with user details
+        function updateNavbar(username) {
+            const nav = document.getElementById('nav-links');
+            const loginBtn = document.getElementById('login-btn');
+
+            if (loginBtn) loginBtn.remove(); // Remove login button if logged in
+
+            const userMenu = document.createElement('div');
+            userMenu.innerHTML = `
+                <div class="user-dropdown">
+                    <a href="#">Hi, ${username}</a>
+                    <div class="dropdown-content">
+                        <a href="guest_dashboard.html">Profile</a>
+                        <a href="#" id="headerLogout">Log out</a>
+                    </div>
+                </div>
+            `;
+            nav.appendChild(userMenu);
+
+            document.getElementById('headerLogout').addEventListener('click', logoutUser);
+        }
+
+        function logout() {
+            fetch('../PHP/logout.php')
+                .then(() => window.location.href = '/PT/HTML/login.html')
+                .catch(err => console.error("Logout error:", err));
+        }
+
+        // Function to get URL parameters
+        function getUrlParameter(name) {
+            name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+            var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+            var results = regex.exec(location.search);
+            return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+        }
+
+        // Function to load facility details based on URL parameter
+        function loadFacilityDetails() {
+            var facility = getUrlParameter('facility');
+            var facilities = document.querySelectorAll('.facility-details');
+
+            if (facility) {
+                facilities.forEach(function (el) {
+                    el.style.display = (el.id === facility) ? 'block' : 'none';
+                });
+            } else {
+                facilities.forEach(function (el) {
+                    el.style.display = 'block';
+                });
+            }
+        }
+    </script>
+</head>
+<body>
+    <div data-include="header.html"></div>
+
+    <div id="mani">
+        <a><img src="../IMG/facilities.webp" alt="facilities"></a>
+        <h1>Facilities</h1>
+    </div>
+
+    <main>
+        <h1>Facility Details</h1>
+
+        <div id="facility-details-container">
+            <div id="indivi-suite" class="facility-details">
+                <h2>Individual Suites</h2>
+                <img src="../IMG/DDH.webp" alt="Individual Suites Image">
+                <p>Give your pet the privacy and comfort they deserve with our spacious, climate-controlled individual suites.</p>
+                <h3>Features:</h3>
+                <ul>
+                    <li>Comfortable bedding and toys</li>
+                    <li>Temperature-controlled rooms</li>
+                    <li>Daily housekeeping</li>
+                    <li>24/7 monitoring and care</li>
+                </ul>
+                <a href="facilities.html" class="btn-back">Back to Facilities</a>
+            </div>
+            
+            <div id="indoor-play" class="facility-details">
+                <h2>Indoor Playground</h2>
+                <img src="../IMG/CIP.webp" alt="Indoor Playground Image">
+                <p>Our indoor play area offers a safe, engaging space where pets can interact, exercise, and have fun, rain or shine!</p>
+                <h3>Features:</h3>
+                <ul>
+                    <li>Supervised play sessions</li>
+                    <li>Obstacle courses and toys</li>
+                    <li>Separate areas for small and large pets</li>
+                </ul>
+                <a href="facilities.html" class="btn-back">Back to Facilities</a>
+            </div>
+            
+            <div id="outdoor-play" class="facility-details">
+                <h2>Outdoor Playground</h2>
+                <img src="../IMG/DOP.webp" alt="Outdoor Playground Image">
+                <p>Our indoor play area offers a safe, engaging space where pets can interact, exercise, and have fun, rain or shine!</p>
+                <h3>Features:</h3>
+                <ul>
+                    <li>Supervised play sessions</li>
+                    <li>Obstacle courses and toys</li>
+                    <li>Separate areas for small and large pets</li>
+                </ul>
+                <a href="facilities.html" class="btn-back">Back to Facilities</a>
+            </div>
+
+            <div id="temp-control" class="facility-details">
+                <h2>Temperature Control</h2>
+                <img src="../IMG/tempcon.webp" alt="Temperature Control Image">
+                <p>Our facility is equipped with modern climate control systems to keep pets comfortable in all seasons.</p>
+                <h3>Features:</h3>
+                <ul>
+                    <li>Air-conditioned rooms</li>
+                    <li>Warm bedding during cold weather</li>
+                    <li>Dehumidifiers to reduce humidity</li>
+                </ul>
+                <a href="facilities.html" class="btn-back">Back to Facilities</a>
+            </div>
+
+            <div id="rfpb" class="facility-details">
+                <h2>Regular Feeding and Potty Breaks</h2>
+                <img src="../IMG/DFPB1.webp" alt="Regular Feeding and Potty Breaks Image">
+                <p>Your pet’s health is our priority. We follow a regular feeding schedule with high-quality pet food.</p>
+                <h3>Features:</h3>
+                <ul>
+                    <li>Customized feeding plans</li>
+                    <li>Access to fresh water 24/7</li>
+                    <li>Frequent potty breaks</li>
+                </ul>
+                <a href="facilities.html" class="btn-back">Back to Facilities</a>
+            </div>
+
+            <div id="enp" class="facility-details">
+                <h2>Exercise and Playtime</h2>
+                <img src="../IMG/enp1.webp" alt="Exercise and Playtime Image">
+                <p>We understand the importance of keeping your pets active and happy. Our exercise and playtime services ensure pets receive the physical stimulation they need in a safe and enjoyable environment.</p>
+                <h3>Features:</h3>
+                <ul>
+                    <li>Individual exercise plans for pets with special needs or preferences</li>
+                    <li>Calming playtime options for shy or elderly pets</li>
+                    <li>Supervised group play sessions for socialization</li>
+                </ul>
+                <a href="facilities.html" class="btn-back">Back to Facilities</a>
+            </div>
+
+            <div id="medical-admin" class="facility-details">
+                <h2>Medication Administration</h2>
+                <img src="../IMG/MA1.webp" alt="Medication Administration Image">
+                <p>We provide professional care for pets with special medical needs.</p>
+                <h3>Features:</h3>
+                <ul>
+                    <li>Trained staff to administer medications</li>
+                    <li>Monitoring of medical conditions</li>
+                    <li>Close coordination with veterinarians</li>
+                </ul>
+                <a href="facilities.html" class="btn-back">Back to Facilities</a>
+            </div>
+
+            <div id="grooming-service" class="facility-details">
+                <h2>Grooming Service</h2>
+                <img src="../IMG/PG2.webp" alt="Grooming Service Image">
+                <p>Keep your pet looking and feeling their best with our grooming services.</p>
+                <h3>Features:</h3>
+                <ul>
+                    <li>Bathing and brushing</li>
+                    <li>Nail trimming</li>
+                    <li>Fur styling and trimming</li>
+                </ul>
+                <a href="facilities.html" class="btn-back">Back to Facilities</a>
+            </div>
+
+            <div id="daycare" class="facility-details">
+                <h2>Daycare Services</h2>
+                <img src="../IMG/daycare.webp" alt="Daycare Services Image">
+                <p>Our daycare program ensures that your pet stays active and social while you are away.</p>
+                <h3>Features:</h3>
+                <ul>
+                    <li>Interactive playtime</li>
+                    <li>Personalized care plans</li>
+                    <li>Nap zones for resting</li>
+                </ul>
+                <a href="facilities.html" class="btn-back">Back to Facilities</a>
+            </div>
+
+            <div id="V-care" class="facility-details">
+                <h2>Veterinary Care</h2>
+                <img src="../IMG/VC.webp" alt="Temperature Control Image">
+                <p>Our on-site vet care ensures your pet receives immediate medical attention when needed.</p>
+                <h3>Features:</h3>
+                <ul>
+                    <li>Routine health checks</li>
+                    <li>Emergency care available 24/7</li>
+                    <li>Vaccinations and wellness plans</li>
+                </ul>
+                <a href="facilities.html" class="btn-back">Back to Facilities</a>
+            </div>
+
+        </div>
+    </main>
+
+
+    <div data-include="contact.html"></div>
+    <div data-include="footer.html"></div>
+</body>
+<script src="../JS/chat_loader.js"></script>
+</html>

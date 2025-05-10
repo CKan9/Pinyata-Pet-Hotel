@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Dashboard</title>
+    <link rel="stylesheet" href="../CSS/dashboard.css">
+</head>
+
+<body>
+    <!-- Header Include -->
+    <div data-include="header.html"></div>
+
+    <!-- Dashboard Banner -->
+    <div id="mani">
+        <img src="../IMG/hooray.jpg" alt="dashboard">
+        <h1>Welcome To Your Dashboard</h1>
+    </div>
+
+    <!-- Dashboard Layout -->
+    <div class="container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <h2 id="userName">UserName</h2>
+            <nav>
+                <ul>
+                    <li><a href="#">Profile</a></li>
+                    <li><a href="userbooking.html">Booking</a></li>
+                    <li><a href="pets.html">Pets</a></li>
+                    <li><a href="#" onclick="logout()">Log out</a></li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="content">
+            <div class="profile-box">
+                <label>Username:</label>
+                <input type="text" id="usernameInput">
+
+                <label>Email:</label>
+                <input type="text" id="emailDisplay" readonly>
+
+                <label>Phone:</label>
+                <input type="text" id="phoneInput">
+
+                <label>New Password:</label>
+                <input type="password" id="passwordInput" placeholder="Leave blank to keep current password">
+
+                <button id="updateBtn">Update Profile</button>
+            </div>
+        </main>
+    </div>
+
+    <!-- Footer Include -->
+    <div data-include="footer.html"></div>
+
+    <!-- Scripts -->
+    <script>
+        // Universal include function
+        function includeHTML(callback) {
+            const includes = document.querySelectorAll('[data-include]');
+            let loaded = 0;
+
+            includes.forEach(element => {
+                fetch(element.getAttribute('data-include'))
+                .then(response => response.text())
+                .then(data => {
+                    element.innerHTML = data;
+                    loaded++;
+                    // Only run callback when all includes are done
+                    if (loaded === includes.length && callback) {
+                        callback();
+                    }
+                })
+                .catch(err => console.error('Error loading file:', err));
+            });
+        }
+
+        // Load after DOM is ready
+        document.addEventListener('DOMContentLoaded', function () {
+            includeHTML(() => {
+                checkSession(); // Now nav-links will exist
+                bindEventListeners(); // Buttons will also exist now
+            });
+            loadDashboard(); // This can run earlier if you want
+        });
+
+        // Populate sidebar & form with user info
+        function loadDashboard() {
+            fetch('../PHP/sessions.php')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        document.getElementById('usernameInput').value = data.username || "N/A";
+                        document.getElementById('userName').textContent = data.username || "UserName";
+                        document.getElementById('emailDisplay').value = data.email || "N/A";
+                        document.getElementById('phoneInput').value = data.phone || "N/A";
+                    } else {
+                        window.location.href = '../HTML/login.html'; // Redirect if no session
+                    }
+                })
+                .catch(error => console.error('Session Fetch Error:', error));
+        }
+
+        // Dynamically add user dropdown in header nav
+        function checkSession() {
+            fetch('../PHP/sessions.php')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const nav = document.getElementById('nav-links');
+                        const loginBtn = document.getElementById('login-btn');
+                        if (loginBtn) loginBtn.remove();
+                        const userMenu = document.createElement('div');
+                        userMenu.innerHTML = `
+                            <div class="user-dropdown">
+                                <a href="#">Hi, ${data.username}</a>
+                                <div class="dropdown-content">
+                                    <a href="guest_dashboard.html">Profile</a>
+                                    <a href="#" id="headerLogout">Log out</a>
+                                </div>
+                            </div>
+                        `;
+                        nav.appendChild(userMenu);
+
+                        // Optional: bind logout inside header dropdown
+                        document.getElementById('headerLogout').addEventListener('click', logoutUser);
+                    }
+                })
+                .catch(err => {
+                    console.error("Error checking session:", err);
+                });
+        }
+
+        // Button Event Listeners
+        function bindEventListeners() {
+            // Profile Update button
+            document.getElementById('updateBtn').addEventListener('click', function () {
+                const username = document.getElementById('usernameInput').value.trim();
+                const phone = document.getElementById('phoneInput').value.trim();
+                const password = document.getElementById('passwordInput').value.trim();
+
+                fetch('../PHP/sessions.php')
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            const userId = data.user_id;
+                            const updateData = { id: userId, username, phone };
+                            if (password) updateData.password = password;
+
+                            fetch('../PHP/update_user.php', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify(updateData)
+                            })
+                                .then(response => response.json())
+                                .then(result => {
+                                    alert(result.message);
+                                    if (result.success) window.location.reload();
+                                })
+                                .catch(error => console.error("Update Error:", error));
+                        }
+                    });
+            });
+
+            // Sidebar Logout button
+            document.getElementById('logoutBtn').addEventListener('click', logoutUser);
+        }
+
+        // Logout Function
+        function logout() {
+            fetch('../PHP/logout.php')
+                .then(() => window.location.href = '/PT/HTML/login.html')
+                .catch(err => console.error("Logout error:", err));
+        }
+    </script>
+</body>
+<script src="../JS/chat_loader.js"></script>
+</html>

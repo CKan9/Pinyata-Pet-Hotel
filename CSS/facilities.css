@@ -1,0 +1,134 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+#mani {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;  /* Container width can be set as needed */
+    height: 500px; /* Set the height as needed */
+    border: 1px solid #ccc; /* Optional: to visualize the container */
+    overflow: hidden; /* Ensures content does not overflow the container */
+    text-align: center;
+}
+
+#mani img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Ensures the image covers the container */
+}
+
+#mani h1 {
+    position: absolute;
+    color: rgb(255, 0, 0);
+    font-size: 48px; /* Adjust font size as needed */
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); /* Optional: adds a shadow for better readability */
+}
+
+main {
+    padding: 20px;
+}
+
+#facilities {
+    margin: 20px 0;
+}
+
+#facilities h2 {
+    text-align: center;
+    color: #2c3e50;
+}
+
+.facility {
+    border: 1px solid #ddd;
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 5px;
+    background-color: #fbf4f4;
+}
+
+.facility h3 {
+    color: #2c3e50;
+    font-size: 28px;
+}
+
+.facility ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.facility ul li {
+    position: relative;
+    display: inline-block;
+    width: 30%;
+    margin: 10px;
+    padding: 20px;
+    color: white;
+    text-align: center;
+    background-size: cover;
+    background-position: center;
+    border-radius: 5px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.facility ul li::before {
+    content: "";
+    display: block;
+    padding-top: 75%; /* Aspect ratio */
+}
+
+.facility ul li span {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 1.2em;
+    font-weight: bold;
+    text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.7);
+}
+
+/* Add more background-image classes for each facility */
+.indivi-suite {
+    background-image: url('../IMG/DCH.webp');
+}
+
+.indoor-play {
+    background-image: url('../IMG/DIP.webp');
+}
+
+.outdoor-play {
+    background-image: url('../IMG/COP.webp');
+}
+
+.temp-control {
+    background-image: url('../IMG/tempcon.webp');
+}
+
+.rfpb {
+    background-image: url('../IMG/DFPB2.webp');
+}
+
+.enp {
+    background-image: url('../IMG/enp2.webp');
+}
+
+.medical-admin {
+    background-image: url('../IMG/MA2.webp');
+}
+
+.grooming-service {
+    background-image: url('../IMG/PG1.webp');
+}
+
+.daycare {
+    background-image: url('../IMG/daycare.webp');
+}
+
+.V-care {
+    background-image: url('../IMG/VC.webp');
+}
+
