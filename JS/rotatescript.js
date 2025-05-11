@@ -1,6 +1,6 @@
 // script.js
 document.addEventListener('DOMContentLoaded', () => {
-    const images = ['../IMG/M1.webp', '../IMG/M2.webp', '../IMG/M3.webp', '../IMG/M4.webp'];
+    const images = ['IMG/M1.webp', 'IMG/M2.webp', 'IMG/M3.webp', 'IMG/M4.webp'];
     let currentIndex = 0;
     const imgElement = document.getElementById('rotating-image');
 
