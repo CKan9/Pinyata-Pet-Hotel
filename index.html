@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Website</title>
-    <link rel="stylesheet" href="../CSS/styles.css">
+    <link rel="stylesheet" href="CSS/styles.css">
     <script>
         // Include function stays as-is
         function includeHTML(callback) {
@@ -29,7 +29,7 @@
     
         // Session check inside every page without external file
         function checkSession() {
-            fetch('../PHP/sessions.php')
+            fetch('PHP/sessions.php')
                 .then(response => response.json())
                 .then(data => {
                     const nav = document.getElementById('nav-links');
@@ -67,7 +67,7 @@
         }
     
         function logout() {
-            fetch('../PHP/logout.php')
+            fetch('PHP/logout.php')
                 .then(() => window.location.href = '/PT/HTML/login.html')
                 .catch(err => console.error("Logout error:", err));
         }
@@ -82,16 +82,16 @@
     
 </head>
 <body>
-    <div data-include="header.html"></div>
+    <div data-include="HTML/header.html"></div>
 
     <div id="mani">
-        <img id="rotating-image" src="../IMG/M1.webp" alt="Rotating Image">
+        <img id="rotating-image" src="IMG/M1.webp" alt="Rotating Image">
     </div>
 
-    <script src="../JS/rotatescript.js"></script>
+    <script src="JS/rotatescript.js"></script>
     <main>
         <div id="welcome">
-            <a><img src="../IMG/Star.png" alt="Star"></a>
+            <a><img src="IMG/Star.png" alt="Star"></a>
             <div id="welcometext">
                 <h1>Welcome to Pinyata Pet Hotel</h1><br>
                 <a>Where every pet is treated like family! Located in the heart of [city/region], Pinyata Pet Hotel offers a cozy and playful escape for your furry companions, ensuring their stay is filled with love, care, and fun.</a>
@@ -103,22 +103,23 @@
                 <h2>About Us</h2>
                 <a>Established in [year], Pinyata Pet Hotel is dedicated to providing top-tier hospitality for pets. Our goal is to create a safe and enjoyable environment where pets feel at home while you're away. Whether it's a short stay or an extended vacation, we offer personalized care to meet your pet’s unique needs.</a>
             </div>
-            <a><img src="../IMG/about.png" alt="break" width="900" height="900"></a>
+            <a><img src="IMG/about.png" alt="break" width="900" height="900"></a>
         </div>
 
         <div id="Room">
-            <a><img id="rotate-room" src="../IMG/PH.webp" alt="room"></a>
+            <a><img id="rotate-room" src="IMG/PH.webp" alt="room"></a>
             <div id="Roomtext">
                 <h2>Our Suites</h2>
                 <a>Our pet-friendly suites are designed to provide maximum comfort and relaxation. Each suite features cozy bedding, playful toys, and ample space to stretch and roam. We also offer special care packages, including grooming services, daily walks, and pet-friendly treats.</a>
                 <br><br>
-                <a href="room.html"><button id="read-more-btn">Read More</button></a>
+                <a href="HTML/room.html"><button id="read-more-btn">Read More</button></a>
             </div>
         </div>
     </main>
 
-    <div data-include="contact.html"></div>
-    <div data-include="footer.html"></div>
+    <div data-include="HTML/contact.html"></div>
+    <div data-include="HTML/footer.html"></div>
 </body>
-<script src="../JS/chat_loader.js"></script>
+
+<script src="JS/chat_loader.js"></script>
 </html>
