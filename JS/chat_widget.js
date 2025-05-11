@@ -14,7 +14,7 @@ function toggleChat() {
       messages.innerHTML += `<div><strong>You:</strong> ${userMessage}</div>`;
       input.value = '';
   
-      const response = await fetch('../PHP/chat_bot.php', {
+      const response = await fetch('/PT/PHP/chat_bot.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: userMessage })
