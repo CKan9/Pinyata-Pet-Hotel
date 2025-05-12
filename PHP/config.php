@@ -1,9 +1,9 @@
 <?php
-$servername = "localhost";
-$username = "root";
-$password = ""; // Use your database password
-$dbname = "pinyatahotel";
-$port = 3308;
+$servername = getenv('DB_HOST') ?: 'localhost';
+$username = getenv('DB_USER') ?: 'root';
+$password = getenv('DB_PASSWORD') ?: '';
+$dbname = getenv('DB_NAME') ?: 'pinyatahotel';
+$port = getenv('DB_PORT') ?: 3308;
 
 // Create connection
 $conn = new mysqli($servername, $username, $password, $dbname, $port);
