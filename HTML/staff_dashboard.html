@@ -10,6 +10,7 @@
             includeHTML();
             loadSession();
             loadUsers();
+            updateBookingStatuses();
         });
 
         function includeHTML() {
@@ -83,6 +84,19 @@
                     loadUsers();
                 }).catch(error => console.error('Error deleting user:', error));
             }
+        }
+
+        function updateBookingStatuses() {
+            fetch('../PHP/update_booking_status.php')
+                .then(response => response.text())
+                .then(message => {
+                    console.log("Booking Status Update:", message);
+                    // Optional: Show notification to admin
+                    if (!message.includes("Error")) {
+                        alert(message); 
+                    }
+                })
+                .catch(error => console.error('Update Error:', error));
         }
 
         function logout() {

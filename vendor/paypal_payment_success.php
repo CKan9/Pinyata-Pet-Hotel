@@ -1,8 +1,8 @@
 <?php
 session_start();
-require_once(__DIR__ . '/paypal_1_config.php');
-require_once(__DIR__ . '/paypal_2_accessToken.php');
-include '../PHP/config.php'; // DB connection
+require_once(__DIR__ . '/paypal_config.php');
+require_once(__DIR__ . '/paypal_accessToken.php');
+include '../PHP/config.php';
 
 if (!isset($_GET['token'])) {
     die("No token provided");
@@ -11,7 +11,7 @@ if (!isset($_GET['token'])) {
 $token = $_GET['token'];
 $accessToken = getAccessToken();
 
-// Step 1: Capture the payment
+// Step 1: Capture payment
 $ch = curl_init("https://api-m.sandbox.paypal.com/v2/checkout/orders/$token/capture");
 curl_setopt($ch, CURLOPT_HTTPHEADER, [
     "Content-Type: application/json",
@@ -28,43 +28,67 @@ if (!isset($paymentData['status']) || $paymentData['status'] !== 'COMPLETED') {
     die("Payment not completed.");
 }
 
-// Step 2: Update bookings and insert payment record
-$booking_ids = $_SESSION['paypal_booking_id'];
-$amount = $_SESSION['paypal_amount'];
-$payment_date = date('Y-m-d H:i:s');
-$payment_method = 'PayPal';
-$payment_status = 'Completed';
+// Retrieve pending booking data from session
+if (!isset($_SESSION['pending_booking'])) {
+    die("Booking data not found.");
+}
 
-foreach ($booking_ids as $booking_id) {
-    // Update booking status
-    $stmt = $conn->prepare("UPDATE bookings SET booking_status = 'Paid' WHERE booking_id = ?");
-    $stmt->bind_param("i", $booking_id);
+$bookingData = $_SESSION['pending_booking'];
+$user_id = $bookingData['user_id'];
+$start_date = $bookingData['start_date'];
+$end_date = $bookingData['end_date'];
+$room_id = $bookingData['room_id'];
+$pet_ids = $bookingData['pet_ids'];
+$total_amount_myr = $bookingData['total_amount_myr']; // Get MYR amount from session
+
+// Start transaction
+$conn->begin_transaction();
+
+try {
+    $booking_ids = [];
+    $payment_date = date('Y-m-d H:i:s');
+    $payment_method = 'PayPal';
+    $payment_status = 'Completed';
+
+    // Insert bookings with MYR amount
+    foreach ($pet_ids as $pet_id) {
+        $stmt = $conn->prepare("
+            INSERT INTO bookings 
+                (user_id, pet_id, room_id, start_date, end_date, total_amount, booking_status) 
+            VALUES (?, ?, ?, ?, ?, ?, 'Paid')
+        ");
+        $stmt->bind_param("iiissd", $user_id, $pet_id, $room_id, $start_date, $end_date, $total_amount_myr);
+        $stmt->execute();
+        $booking_ids[] = $conn->insert_id;
+        $stmt->close();
+    }
+
+    // Insert payment record with MYR amount
+    $stmt = $conn->prepare("
+        INSERT INTO payments 
+            (user_id, payment_date, amount, payment_method, payment_status) 
+        VALUES (?, ?, ?, ?, ?)
+    ");
+    $stmt->bind_param("isdss", $user_id, $payment_date, $total_amount_myr, $payment_method, $payment_status);
     $stmt->execute();
     $stmt->close();
 
-    // Insert payment record
-    $stmt2 = $conn->prepare("INSERT INTO payments (booking_id, payment_date, amount, payment_method, payment_status) 
-                             VALUES (?, ?, ?, ?, ?)");
-    $stmt2->bind_param("isdss", $booking_id, $payment_date, $amount, $payment_method, $payment_status);
-    $stmt2->execute();
-    $stmt2->close();
+    $conn->commit();
+} catch (Exception $e) {
+    $conn->rollback();
+    die("Error: " . $e->getMessage());
 }
 
-$conn->close();
+// Clear session data
+unset($_SESSION['pending_booking']);
+unset($_SESSION['paypal_amount']);
 
-// Step 3: Show success message
+// Show success message
 echo "
     <h2>Payment Successful!</h2>
-    <p>Your booking has been confirmed.</p>
-    <p>You will be redirected back to the booking page in 5 seconds...</p>
-
+    <p>Your booking of MYR " . number_format($total_amount_myr, 2) . " has been confirmed.</p>
     <script>
-        setTimeout(function() {
-            window.location.href = '../HTML/Booking.html'; 
-        }, 5000); // 5000 milliseconds = 5 seconds
+        setTimeout(() => window.location.href = '../HTML/Booking.html', 5000);
     </script>
 ";
-unset($_SESSION['paypal_amount']);
-unset($_SESSION['paypal_booking_id']); // Optional: clear session values
-
 ?>
