@@ -28,7 +28,7 @@
                 .then(data => {
                     const nav = document.getElementById('nav-links');
                     const loginBtn = document.getElementById('login-btn');
-    
+
                     if (data.success) {
                         // Remove login button if exists
                         if (loginBtn) loginBtn.remove();
@@ -44,8 +44,10 @@
                             </div>
                         `;
                         nav.appendChild(userMenu);
-    
+
                         document.getElementById('headerLogout').addEventListener('click', logoutUser);
+                        
+                        loadPets();
                     } else {
                         // Add login if it's not there
                         if (!loginBtn) {
