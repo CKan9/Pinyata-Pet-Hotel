@@ -66,7 +66,7 @@
                 .catch(err => console.error("Session Check Error:", err));
         }
     
-        function logout() {
+        function logoutUser() {
             fetch('PHP/logout.php')
                 .then(() => window.location.href = '/PT/HTML/login.html')
                 .catch(err => console.error("Logout error:", err));
@@ -91,7 +91,7 @@
     <script src="JS/rotatescript.js"></script>
     <main>
         <div id="welcome">
-            <a><img src="IMG/Star.png" alt="Star"></a>
+            <a><img src="IMG/Star.webp" alt="Star"></a>
             <div id="welcometext">
                 <h1>Welcome to Pinyata Pet Hotel</h1><br>
                 <a>Where every pet is treated like family! Located in the heart of [city/region], Pinyata Pet Hotel offers a cozy and playful escape for your furry companions, ensuring their stay is filled with love, care, and fun.</a>
@@ -103,7 +103,7 @@
                 <h2>About Us</h2>
                 <a>Established in [year], Pinyata Pet Hotel is dedicated to providing top-tier hospitality for pets. Our goal is to create a safe and enjoyable environment where pets feel at home while you're away. Whether it's a short stay or an extended vacation, we offer personalized care to meet your pet’s unique needs.</a>
             </div>
-            <a><img src="IMG/about.png" alt="break" width="900" height="900"></a>
+            <a><img src="IMG/about.webp" alt="break" width="900" height="900"></a>
         </div>
 
         <div id="Room">

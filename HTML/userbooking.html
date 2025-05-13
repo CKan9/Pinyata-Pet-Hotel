@@ -13,7 +13,7 @@
     <div data-include="header.html"></div>
 
     <div id="mani">
-        <img src="../IMG/hooray.jpg" alt="dashboard">
+        <img src="../IMG/hooray.webp" alt="dashboard">
         <h1>Welcome To Your Dashboard</h1>
     </div>
 
@@ -26,7 +26,7 @@
                     <li><a href="guest_dashboard.html">Profile</a></li>
                     <li><a href="userbooking.html">Booking</a></li>
                     <li><a href="pets.html">Pets</a></li>
-                    <li><a href="#" onclick="logout()">Log out</a></li>
+                    <li><a href="#" onclick="logoutUser()">Log out</a></li>
                 </ul>
             </nav>
         </aside>
@@ -179,7 +179,7 @@
             });
         }
 
-        function logout() {
+        function logoutUser() {
             fetch('../PHP/logout.php')
                 .then(() => window.location.href = '/PT/HTML/login.html')
                 .catch(err => console.error("Logout error:", err));

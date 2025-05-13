@@ -13,7 +13,7 @@
     <div data-include="header.html"></div>
 
     <div id="mani">
-        <img src="../IMG/hooray.jpg" alt="dashboard">
+        <img src="../IMG/hooray.webp" alt="dashboard">
         <h1>Welcome To Your Dashboard</h1>
     </div>
 
@@ -64,14 +64,14 @@
     </div>
 
     <script>
-document.addEventListener("DOMContentLoaded", function () {
-    checkSession();           // Check session
-    bindEventListeners();     // Bind button clicks
-    loadPetData();            // If editing, pre-fill form
-});
+        document.addEventListener("DOMContentLoaded", function () {
+            checkSession();           // Check session
+            bindEventListeners();     // Bind button clicks
+            loadPetData();            // If editing, pre-fill form
+        });
 
-// Check if user is logged in
-function checkSession() {
+        // Check if user is logged in
+        function checkSession() {
             fetch('../PHP/sessions.php')
                 .then(response => response.json())
                 .then(data => {
@@ -108,114 +108,120 @@ function checkSession() {
                 .catch(error => console.error('Session Fetch Error:', error));
         }
 
-// Button Events
-function bindEventListeners() {
-    document.getElementById('logoutBtn').addEventListener('click', function (e) {
-        e.preventDefault();
-        fetch('../PHP/logout.php', { method: 'POST' })
+        function logoutUser() {
+            fetch('../PHP/logout.php')
+                .then(() => window.location.href = '/PT/HTML/login.html')
+                .catch(err => console.error("Logout error:", err));
+        }
+
+        // Button Events
+        function bindEventListeners() {
+            document.getElementById('logoutBtn').addEventListener('click', function (e) {
+                e.preventDefault();
+                fetch('../PHP/logout.php', { method: 'POST' })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success) window.location.href = '../HTML/login.html';
+                    })
+                    .catch(err => console.error("Logout Error:", err));
+            });
+
+            document.getElementById('backButton').addEventListener('click', () => window.history.back());
+
+            // Preview selected image
+            document.getElementById('petPicture').addEventListener('change', function (e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        const imgPreview = document.getElementById('imagePreview');
+                        imgPreview.src = e.target.result;
+                        imgPreview.style.display = "block";
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            // Form submit: Add or Update Pet
+            document.getElementById('addPetForm').addEventListener('submit', function (event) {
+            event.preventDefault();
+
+            const petId = new URLSearchParams(window.location.search).get('pet_id');
+            const url = petId ? '../PHP/update_pet.php' : '../PHP/add_pet.php';
+            const formData = new FormData(this);
+
+            // 👇 Safely append pet_id
+            if (petId) {
+                formData.append('pet_id', petId);
+            }
+
+            // 👇 Handle existing picture
+            const fileInput = document.getElementById('petPicture');
+            const existingPictureInput = document.getElementById('existingPicture');
+            const existingPicture = existingPictureInput ? existingPictureInput.value : '';
+
+            if (existingPicture) {
+                formData.append('existing_picture', existingPicture);
+            }
+
+
+            fetch(url, {
+                method: 'POST',
+                body: formData
+            })
             .then(res => res.json())
             .then(data => {
-                if (data.success) window.location.href = '../HTML/login.html';
+                alert(data.message);
+                if (data.success) {
+                    window.location.href = "pets.html";
+                }
             })
-            .catch(err => console.error("Logout Error:", err));
-    });
+            .catch(err => console.error("Submit Error:", err));
+        });
 
-    document.getElementById('backButton').addEventListener('click', () => window.history.back());
-
-    // Preview selected image
-    document.getElementById('petPicture').addEventListener('change', function (e) {
-        const file = e.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = function (e) {
-                const imgPreview = document.getElementById('imagePreview');
-                imgPreview.src = e.target.result;
-                imgPreview.style.display = "block";
-            };
-            reader.readAsDataURL(file);
         }
-    });
 
-    // Form submit: Add or Update Pet
-    document.getElementById('addPetForm').addEventListener('submit', function (event) {
-    event.preventDefault();
+        // If editing, load data into form
+        function loadPetData() {
+            const petId = new URLSearchParams(window.location.search).get('pet_id');
+            if (!petId) return;
 
-    const petId = new URLSearchParams(window.location.search).get('pet_id');
-    const url = petId ? '../PHP/update_pet.php' : '../PHP/add_pet.php';
-    const formData = new FormData(this);
+            fetch(`../PHP/get_pet_by_id.php?pet_id=${petId}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        const pet = data.pet;
+                        document.querySelector("h2").textContent = `Edit Pet: ${pet.pet_name}`;
+                        document.getElementById('submitButton').textContent = "Update Pet";
 
-    // 👇 Safely append pet_id
-    if (petId) {
-        formData.append('pet_id', petId);
-    }
+                        document.getElementById('petName').value = pet.pet_name;
+                        document.getElementById('petType').value = pet.pet_type;
+                        document.getElementById('breed').value = pet.breed;
+                        document.getElementById('age').value = pet.age;
+                        document.getElementById('specialNotes').value = pet.special_notes || "";
 
-    // 👇 Handle existing picture
-    const fileInput = document.getElementById('petPicture');
-    const existingPictureInput = document.getElementById('existingPicture');
-    const existingPicture = existingPictureInput ? existingPictureInput.value : '';
+                        // Set existing picture URL if available
+                        if (!document.getElementById('existingPicture')) {
+                            const hiddenInput = document.createElement('input');
+                            hiddenInput.type = 'hidden';
+                            hiddenInput.name = 'existing_picture';
+                            hiddenInput.id = 'existingPicture';
+                            document.getElementById('addPetForm').appendChild(hiddenInput);
+                        }
+                        document.getElementById('existingPicture').value = pet.picture_url;
 
-    if (existingPicture) {
-        formData.append('existing_picture', existingPicture);
-    }
-
-
-    fetch(url, {
-        method: 'POST',
-        body: formData
-    })
-    .then(res => res.json())
-    .then(data => {
-        alert(data.message);
-        if (data.success) {
-            window.location.href = "pets.html";
+                        // Display existing picture if available
+                        if (pet.picture_url) {
+                            const img = document.getElementById('imagePreview');
+                            img.src = pet.picture_url;
+                            img.style.display = "block";
+                        }
+                    } else {
+                        console.error("Load Error:", data.message);
+                    }
+                })
+                .catch(err => console.error("Fetch Error:", err));
         }
-    })
-    .catch(err => console.error("Submit Error:", err));
-});
-
-}
-
-// If editing, load data into form
-function loadPetData() {
-    const petId = new URLSearchParams(window.location.search).get('pet_id');
-    if (!petId) return;
-
-    fetch(`../PHP/get_pet_by_id.php?pet_id=${petId}`)
-        .then(res => res.json())
-        .then(data => {
-            if (data.success) {
-                const pet = data.pet;
-                document.querySelector("h2").textContent = `Edit Pet: ${pet.pet_name}`;
-                document.getElementById('submitButton').textContent = "Update Pet";
-
-                document.getElementById('petName').value = pet.pet_name;
-                document.getElementById('petType').value = pet.pet_type;
-                document.getElementById('breed').value = pet.breed;
-                document.getElementById('age').value = pet.age;
-                document.getElementById('specialNotes').value = pet.special_notes || "";
-
-                // Set existing picture URL if available
-                if (!document.getElementById('existingPicture')) {
-                    const hiddenInput = document.createElement('input');
-                    hiddenInput.type = 'hidden';
-                    hiddenInput.name = 'existing_picture';
-                    hiddenInput.id = 'existingPicture';
-                    document.getElementById('addPetForm').appendChild(hiddenInput);
-                }
-                document.getElementById('existingPicture').value = pet.picture_url;
-
-                // Display existing picture if available
-                if (pet.picture_url) {
-                    const img = document.getElementById('imagePreview');
-                    img.src = pet.picture_url;
-                    img.style.display = "block";
-                }
-            } else {
-                console.error("Load Error:", data.message);
-            }
-        })
-        .catch(err => console.error("Fetch Error:", err));
-}
 </script>
 </body>
 <script src="../JS/chat_loader.js"></script>

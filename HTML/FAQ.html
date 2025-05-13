@@ -69,7 +69,7 @@
                 .catch(err => console.error("Session Check Error:", err));
         }
     
-        function logout() {
+        function logoutUser() {
             fetch('../PHP/logout.php')
                 .then(() => window.location.href = '/PT/HTML/login.html')
                 .catch(err => console.error("Logout error:", err));
@@ -81,7 +81,7 @@
     <div data-include="header.html"></div>
 
     <div id="mani">
-        <a><img src="../IMG/FAQ.jpg" alt="FAQ"></a>
+        <a><img src="../IMG/FAQ.webp" alt="FAQ"></a>
         <h1>FAQ</h1>
     </div>
 
