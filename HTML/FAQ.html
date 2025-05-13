@@ -5,76 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Pet Hotel - FAQ</title>
     <link rel="stylesheet" href="../CSS/FAQ.css">
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // Load included HTML elements
-            document.querySelectorAll('[data-include]').forEach(async (el) => {
-                const file = el.getAttribute('data-include');
-                if (file) {
-                    const response = await fetch(file);
-                    if (response.ok) {
-                        el.innerHTML = await response.text();
-                        if (file === 'header.html') {
-                            checkSession(); // Call session check after header loads
-                        }
-                    } else {
-                        el.innerHTML = 'Failed to load content.';
-                    }
-                }
-            });
-    
-            // Toggle FAQ answers
-            document.querySelectorAll('.faq-question').forEach(question => {
-                question.addEventListener('click', () => {
-                    const answer = question.nextElementSibling;
-                    answer.style.display = answer.style.display === 'block' ? 'none' : 'block';
-                });
-            });
-        });
-    
-        // Function to check session and update the header
-        function checkSession() {
-            fetch('../PHP/sessions.php')
-                .then(response => response.json())
-                .then(data => {
-                    const nav = document.getElementById('nav-links');
-                    const loginBtn = document.getElementById('login-btn');
-    
-                    if (data.success) {
-                        if (loginBtn) loginBtn.remove(); // Remove login button if logged in
-    
-                        const userMenu = document.createElement('div');
-                        userMenu.innerHTML = `
-                            <div class="user-dropdown">
-                                <a href="#">Hi, ${data.username}</a>
-                                <div class="dropdown-content">
-                                    <a href="guest_dashboard.html">Profile</a>
-                                    <a href="#" id="headerLogout">Log out</a>
-                                </div>
-                            </div>
-                        `;
-                        nav.appendChild(userMenu);
-    
-                        document.getElementById('headerLogout').addEventListener('click', logoutUser);
-                    } else {
-                        if (!loginBtn) {
-                            const loginLink = document.createElement('a');
-                            loginLink.href = "login.html";
-                            loginLink.id = "login-btn";
-                            loginLink.textContent = "Login";
-                            nav.appendChild(loginLink);
-                        }
-                    }
-                })
-                .catch(err => console.error("Session Check Error:", err));
-        }
-    
-        function logoutUser() {
-            fetch('../PHP/logout.php')
-                .then(() => window.location.href = '/PT/HTML/login.html')
-                .catch(err => console.error("Logout error:", err));
-        }
-    </script>
     
 </head>
 <body>
@@ -163,31 +93,81 @@
 
     <div data-include="contact.html"></div>
     <div data-include="footer.html"></div>
-</body>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Load included HTML (header, footer, etc.)
+            document.querySelectorAll('[data-include]').forEach(async (el) => {
+                const file = el.getAttribute('data-include');
+                if (file) {
+                    try {
+                        const response = await fetch(file);
+                        if (response.ok) {
+                            el.innerHTML = await response.text();
 
-<script>
-    // Include HTML files
-    document.addEventListener('DOMContentLoaded', () => {
-        document.querySelectorAll('[data-include]').forEach(async (el) => {
-            const file = el.getAttribute('data-include');
-            if (file) {
-                const response = await fetch(file);
-                if (response.ok) {
-                    el.innerHTML = await response.text();
-                } else {
-                    el.innerHTML = 'Failed to load content.';
+                            if (file === 'header.html') checkSession();
+                        } else {
+                            el.innerHTML = 'Failed to load content.';
+                        }
+                    } catch (error) {
+                        console.error("Include fetch error:", error);
+                    }
                 }
-            }
-        });
-    });
+            });
 
-    // Toggle FAQ answers
-    document.querySelectorAll('.faq-question').forEach(question => {
-        question.addEventListener('click', () => {
-            const answer = question.nextElementSibling;
-            answer.style.display = answer.style.display === 'block' ? 'none' : 'block';
+            // Attach toggle functionality after a short delay to ensure DOM is populated
+            setTimeout(() => {
+                document.querySelectorAll('.faq-question').forEach((question) => {
+                    question.addEventListener('click', () => {
+                        const answer = question.nextElementSibling;
+                        answer.style.display = answer.style.display === 'block' ? 'none' : 'block';
+                    });
+                });
+            }, 500);
         });
-    });
-</script>
-<script src="../JS/chat_loader.js"></script>
+
+        function checkSession() {
+            fetch('../PHP/sessions.php')
+                .then(response => response.json())
+                .then(data => {
+                    const nav = document.getElementById('nav-links');
+                    const loginBtn = document.getElementById('login-btn');
+
+                    if (data.success) {
+                        if (loginBtn) loginBtn.remove();
+
+                        const userMenu = document.createElement('div');
+                        userMenu.innerHTML = `
+                            <div class="user-dropdown">
+                                <a href="#">Hi, ${data.username}</a>
+                                <div class="dropdown-content">
+                                    <a href="guest_dashboard.html">Profile</a>
+                                    <a href="#" id="headerLogout">Log out</a>
+                                </div>
+                            </div>
+                        `;
+                        nav.appendChild(userMenu);
+                        document.getElementById('headerLogout').addEventListener('click', logoutUser);
+                    } else {
+                        if (!loginBtn && nav) {
+                            const loginLink = document.createElement('a');
+                            loginLink.href = "login.html";
+                            loginLink.id = "login-btn";
+                            loginLink.textContent = "Login";
+                            nav.appendChild(loginLink);
+                        }
+                    }
+                })
+                .catch(err => console.error("Session Check Error:", err));
+        }
+
+        function logoutUser() {
+            fetch('../PHP/logout.php')
+                .then(() => window.location.href = '/PT/HTML/login.html')
+                .catch(err => console.error("Logout error:", err));
+        }
+    </script>
+
+    <script src="../JS/chat_loader.js"></script>
+</body>
 </html>
