@@ -5,15 +5,41 @@ require_once('../PHP/config.php');
 $input = json_decode(file_get_contents('php://input'), true);
 $userMessage = $input['message'] ?? '';
 
-// Check for available rooms
-if (preg_match('/room.*available.*(\d{4}-\d{2}-\d{2})/i', $userMessage, $matches)) {
+// ========== Example 1: Check available rooms on a specific date ==========
+if (preg_match('/room.*available.*(\d{4}-\d{2}-\d{2})/', $userMessage, $matches)) {
     $date = $matches[1];
     $sql = "SELECT COUNT(*) AS available_rooms FROM rooms WHERE room_id NOT IN (
         SELECT room_id FROM bookings WHERE '$date' BETWEEN start_date AND end_date
     )";
     $result = $conn->query($sql);
     $row = $result->fetch_assoc();
-    $reply = "🐶 We have " . $row['available_rooms'] . " room(s) available on $date. Would you like to book one?";
+    $reply = "🐾 We have " . $row['available_rooms'] . " room(s) available on $date. Would you like to book one?";
+    echo json_encode(['reply' => $reply]);
+    exit;
+}
+
+// ========== Example 2: Show types of rooms ==========
+if (strpos($userMessage, 'what types of rooms') !== false || strpos($userMessage, 'room types') !== false) {
+    $sql = "SELECT DISTINCT room_type FROM rooms";
+    $result = $conn->query($sql);
+    $types = [];
+    while ($row = $result->fetch_assoc()) {
+        $types[] = $row['room_type'];
+    }
+    $reply = "🏠 We offer the following types of rooms: " . implode(', ', $types) . ".";
+    echo json_encode(['reply' => $reply]);
+    exit;
+}
+
+// ========== Example 3: Supported pet types ==========
+if (preg_match('/(what|which).*pet.*(support|allowed|accept|room)/i', $userMessage)) {
+    $sql = "SELECT DISTINCT pet_type FROM rooms";
+    $result = $conn->query($sql);
+    $pets = [];
+    while ($row = $result->fetch_assoc()) {
+        $pets[] = ucfirst($row['pet_type']);
+    }
+    $reply = "🐾 We currently support rooms for the following pet types: " . implode(', ', $pets) . ".";
     echo json_encode(['reply' => $reply]);
     exit;
 }

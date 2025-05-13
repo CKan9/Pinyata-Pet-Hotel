@@ -18,7 +18,7 @@ $booking_id = $_GET['id'];
 $user_id = $_SESSION['user_id'];
 
 // Secure query to get booking for this user
-$sql = "SELECT booking_id, user_id, pet_id, room_id, start_date, end_date, total_amount, booking_status, managed_by 
+$sql = "SELECT booking_id, user_id, pet_id, room_id, start_date, end_date, total_amount, booking_status 
         FROM bookings 
         WHERE booking_id = ? AND user_id = ?";
 
