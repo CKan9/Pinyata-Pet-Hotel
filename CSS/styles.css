@@ -1,222 +1,341 @@
 /* styles.css */
+
 body {
     font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
-    padding-bottom: 50px;
-    overflow-x: hidden;
+    padding-bottom: 50px; /* Adjust this value to be the height of your fixed footer */
 }
 
 main {
-    padding-top: 100px;
+    padding-top: 1px;
 }
 
-/* Header Styles */
 #header {
     position: fixed;
     top: 0;
     width: 100%;
     z-index: 1000;
-    background-color: rgba(0,76,84,0.9);
+    background-color: rgba(0,76,84,0.2);
+    color: white;
 }
 
 #top-bar {
     background-color: #1e98a5;
+    color: black;
     display: flex;
-    justify-content: flex-end;
+    justify-content: space-between;
+    align-items: center;
     padding: 5px 20px;
+    font-size: 14px;
 }
 
 .social-media-icons a {
-    margin-left: 15px;
+    margin-right: 15px;
 }
 
-.icon {
-    width: 24px;
-    height: 24px;
+.subscribe {
+    color: #004c54;
+    text-decoration: none;
+    font-weight: bold;
 }
 
-/* Navigation Styles */
 #navbar {
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 10px 20px;
+    background-color: rgba(0,76,84,0.2);
+}
+
+.icon {
+    width: 24px;  /* Set your desired width */
+    height: 24px; /* Set your desired height */
 }
 
 .logo-img {
-    width: 200px;
-    height: auto;
-    max-height: 75px;
+    width: 200px;  /* Set your desired width for the logo */
+    height: 75px;  /* Adjust height proportionally */
 }
 
 nav a {
     color: white;
     text-decoration: none;
-    margin: 0 10px;
+    margin: 0 15px;
     padding: 10px 15px;
-    transition: all 0.3s ease;
+    display: inline-block;
+    transition: background-color 0.3s;
 }
 
 nav a:hover {
     background-color: #027373;
-    border-radius: 4px;
 }
 
-.book-now {
-    background-color: #ff4444;
-    border-radius: 5px;
-    padding: 10px 20px;
+#footer {
+    background-color: #cfffff;
+    text-align: center;
+    padding: 3px 0;
+    bottom: 0;
+    width: 100%;
 }
 
-/* Mobile Menu Styles */
-.hamburger {
-    display: none;
-    cursor: pointer;
-    z-index: 1001;
-}
-
-.hamburger .bar {
-    width: 25px;
-    height: 3px;
-    background-color: white;
-    margin: 5px 0;
-    transition: all 0.3s ease;
-}
-
-/* Content Sections */
 #mani {
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 70vh;
-    max-height: 500px;
-    overflow: hidden;
-    margin-top: 20px;
+    width: 100%;  /* Container width can be set as needed */
+    height: 500px; /* Set the height as needed */
+    border: 1px solid #ccc; /* Optional: to visualize the container */
+    overflow: hidden; /* Ensures content does not overflow the container */
+    padding-top: 16px;
 }
 
 #rotating-image {
     width: 100%;
-    height: auto;
-    object-fit: cover;
+    height: 44444px; /* Maintain aspect ratio */
 }
 
-/* Section Common Styles */
-#welcome, #About, #Room {
+#mani img {
+    max-width: 100%;
+    max-height: 100%;
+}
+
+#welcome {
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 40px 20px;
-    margin: 20px 0;
+    border: 1px solid #ccc; /* Optional: Adds a border around the whole container */
+    padding: 20px; /* Optional: Adds some padding for spacing */
+    background-color: #d0f6ff;
+    color: rgb(167, 35, 249);
 }
 
-#welcome { background-color: #d0f6ff; }
-#About { background-color: #fff4e6; }
-#Room { background-color: #ffe0e0; }
+#welcome img {
+    max-width: 100%;
+    height: auto;
+}
 
-/* Text Content Styles */
-#welcometext, #Abouttext, #Roomtext {
-    flex: 1;
-    padding: 0 30px;
+#welcometext {
+    margin-left: 20px; /* Adjust margin as needed */
+    text-align: left;
+}
+
+#welcometext h1 {
+    font-size: 24px; /* Adjust font size as needed */
+}
+
+#welcometext p {
+    font-size: 16px; /* Adjust font size as needed */
+}
+
+#About {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #ccc; /* Optional: Adds a border around the whole container */
+    padding: 20px; /* Optional: Adds some padding for spacing */
+    background-color: #fff4e6;
+    color: rgb(18, 6, 247);
+}
+
+#About img {
+    max-width: 100%;
+    height: auto;
+}
+
+#Abouttext {
+    margin-left: 20px; /* Adjust margin as needed */
+    text-align: left;
+}
+
+#Abouttext h1 {
+    font-size: 24px; /* Adjust font size as needed */
+}
+
+#Abouttext p {
+    font-size: 16px; /* Adjust font size as needed */
+}
+
+#Room {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #ccc; /* Optional: Adds a border around the whole container */
+    padding: 20px; /* Optional: Adds some padding for spacing */
+    background-color: #ffe0e0;
+    color: rgb(247, 6, 6);
+}
+
+#Room img {
+    max-width: 100%;
+    height: auto;
+}
+
+#Roomtext {
+    margin-left: 20px; /* Adjust margin as needed */
+    text-align: left;
+}
+
+#Roomtext h1 {
+    font-size: 24px; /* Adjust font size as needed */
+}
+
+#Roomtext p {
+    font-size: 16px; /* Adjust font size as needed */
+}
+
+#rotate-room {
+    width: 2000px;
+    height: auto; /* Maintain aspect ratio */
 }
 
 #read-more-btn {
-    background-color: #ff0000;
-    color: #fff;
-    border: none;
-    padding: 12px 24px;
-    font-size: 16px;
+    background-color: #ff0000; /* Button background color */
+    color: #fff; /* Button text color */
+    border: none; /* Remove button border */
+    padding: 10px 20px; /* Adjust padding as needed */
+    font-size: 16px; /* Adjust font size as needed */
     cursor: pointer;
     transition: background-color 0.3s ease;
-    border-radius: 5px;
 }
 
 #read-more-btn:hover {
-    background-color: #cc0000;
+    background-color: #0056b3; /* Button background color on hover */
 }
 
-/* Mobile Responsive Styles */
 @media (max-width: 768px) {
-    main {
-        padding-top: 140px;
-    }
-
-    .hamburger {
-        display: block;
-        position: absolute;
-        right: 20px;
-        top: 20px;
-    }
-
-    #nav-links {
-        position: fixed;
-        top: 80px;
-        right: -100%;
+    #welcome {
         flex-direction: column;
-        background-color: rgba(0,76,84,0.95);
-        width: 100%;
-        height: calc(100vh - 80px);
-        padding: 20px 0;
-        transition: all 0.3s ease;
-    }
-
-    #nav-links.active {
-        right: 0;
-    }
-
-    nav a {
-        width: 100%;
-        margin: 10px 0;
-        padding: 15px;
         text-align: center;
     }
 
-    .social-media-icons {
-        display: none;
+    #welcome img {
+        margin-bottom: 20px;
     }
 
+    #About {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    #About img {
+        margin-bottom: 20px;
+    }
+
+    #Room {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    #Room img {
+        margin-bottom: 20px;
+    }
+
+    .user-dropdown {
+        position: relative;
+        display: inline-block;
+    }
+    .user-dropdown a {
+        padding: 10px;
+        color: black;
+        text-decoration: none;
+    }
+    .user-dropdown .dropdown-content {
+        display: none;
+        position: absolute;
+        background-color: #f9f9f9;
+        box-shadow: 0px 8px 16px rgba(0,0,0,0.2);
+        z-index: 1;
+    }
+    .user-dropdown:hover .dropdown-content {
+        display: block;
+    }
+    .dropdown-content a {
+        display: block;
+        padding: 8px 12px;
+        color: #333;
+        text-decoration: none;
+    }
+    .dropdown-content a:hover {
+        background-color: #f1f1f1;
+    }
+
+    /* Mobile Hamburger Styles */
+.hamburger {
+    display: none; /* Hidden by default on desktop */
+    cursor: pointer;
+    padding: 10px;
+}
+
+.hamburger .bar {
+    display: block;
+    width: 25px;
+    height: 3px;
+    margin: 5px auto;
+    background-color: white;
+    transition: all 0.3s ease;
+}
+
+/* Mobile Navigation */
+@media (max-width: 768px) {
     /* Hamburger Animation */
     .hamburger.active .bar:nth-child(1) {
-        transform: rotate(-45deg) translate(-5px, 6px);
+        transform: translateY(8px) rotate(45deg);
     }
-    
     .hamburger.active .bar:nth-child(2) {
         opacity: 0;
     }
-    
     .hamburger.active .bar:nth-child(3) {
-        transform: rotate(45deg) translate(-5px, -6px);
+        transform: translateY(-8px) rotate(-45deg);
     }
 
-    /* Content Sections */
-    #welcome, #About, #Room {
+    /* Navigation Links */
+    #nav-links {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background-color: rgba(0,76,84,0.9);
         flex-direction: column;
-        padding: 30px 15px;
-    }
-
-    #welcometext, #Abouttext, #Roomtext {
-        margin: 20px 0;
         padding: 0;
         text-align: center;
     }
 
-    #rotate-room {
-        width: 100%;
-        max-width: 400px;
+    #nav-links.active {
+        display: flex;
     }
 
-    #mani {
-        height: 50vh;
-        margin-top: 0;
+    #nav-links a {
+        margin: 0;
+        padding: 15px 20px;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    /* User Dropdown Adjustments */
+    .user-dropdown {
+        width: 100%;
+        text-align: center;
+    }
+
+    .dropdown-content {
+        position: static;
+        width: 100%;
+        background-color: transparent;
+        box-shadow: none;
+    }
+
+    .dropdown-content a {
+        color: white;
+        padding: 10px 20px;
     }
 }
 
-/* Footer Styles */
-#footer {
-    background-color: #cfffff;
-    text-align: center;
-    padding: 20px 0;
-    position: relative;
-    bottom: 0;
-    width: 100%;
+/* Ensure logo doesn't get too big on mobile */
+@media (max-width: 480px) {
+    .logo-img {
+        width: 150px;
+        height: auto;
+    }
+}
 }
