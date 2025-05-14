@@ -71,11 +71,36 @@
                 .then(() => window.location.href = '/PT/HTML/login.html')
                 .catch(err => console.error("Logout error:", err));
         }
-    
-        // Call after DOM is ready
+
+        // Add this to your existing script
+        function toggleMenu() {
+            const navLinks = document.getElementById('nav-links');
+            const hamburger = document.querySelector('.hamburger');
+            navLinks.classList.toggle('active');
+            hamburger.classList.toggle('active');
+        }
+
+        function setupMobileMenu() {
+            const hamburger = document.querySelector('.hamburger');
+            if (hamburger) {
+                hamburger.addEventListener('click', toggleMenu);
+            }
+        }
+
+        // Update DOMContentLoaded event
         document.addEventListener('DOMContentLoaded', function () {
             includeHTML(() => {
-                checkSession(); // Check session after header loaded
+                checkSession();
+                setupMobileMenu();
+                // Close mobile menu when clicking outside
+                document.addEventListener('click', (e) => {
+                    const navLinks = document.getElementById('nav-links');
+                    const hamburger = document.querySelector('.hamburger');
+                    if (!e.target.closest('#navbar') && navLinks.classList.contains('active')) {
+                        navLinks.classList.remove('active');
+                        hamburger.classList.remove('active');
+                    }
+                });
             });
         });
     </script>
