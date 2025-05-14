@@ -73,11 +73,27 @@
         }
     
         // Call after DOM is ready
-        document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', () => {
             includeHTML(() => {
-                checkSession(); // Check session after header loaded
+                checkSession();
+                setupMobileMenu();
+                // Mobile menu toggle
+                document.querySelector('.hamburger').addEventListener('click', toggleMenu);
             });
         });
+
+        function toggleMenu() {
+            document.getElementById('nav-links').classList.toggle('active');
+            document.querySelector('.hamburger').classList.toggle('active');
+        }
+
+        // Add this new function
+        function setupMobileMenu() {
+            const hamburger = document.querySelector('.hamburger');
+            if (hamburger) {
+                hamburger.addEventListener('click', toggleMenu);
+            }
+        }
     </script>
 </head>
 <body>

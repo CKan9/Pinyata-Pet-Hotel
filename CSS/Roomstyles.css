@@ -218,3 +218,39 @@
 #booking-btn3:hover {
     background-color: #00ffff; /* Button background color on hover */
 }
+
+/* Mobile Styles */
+@media (max-width: 768px) {
+    main {
+        padding-top: 140px;
+    }
+
+    .suite-container {
+        flex-direction: column;
+        padding: 20px 15px;
+        margin: 20px 0;
+    }
+
+    .suite-container:nth-child(even) {
+        flex-direction: column;
+    }
+
+    .suite-image {
+        max-width: 100%;
+        padding: 0;
+        margin-bottom: 20px;
+    }
+
+    .suite-content {
+        padding: 0;
+    }
+
+    #mani h1 {
+        font-size: 2rem;
+    }
+
+    .booking-btn {
+        width: 100%;
+        text-align: center;
+    }
+}
