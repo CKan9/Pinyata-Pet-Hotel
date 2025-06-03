@@ -1,5 +1,5 @@
 //chat_loader.js
-fetch('../HTML/chat_widget.html')
+fetch('/PT/HTML/chat_widget.html')
   .then(res => res.text())
   .then(html => {
     const div = document.createElement('div');
@@ -8,7 +8,7 @@ fetch('../HTML/chat_widget.html')
 
     // Load and bind chat script AFTER widget is injected
     const script = document.createElement('script');
-    script.src = '../JS/chat_widget.js';
+    script.src = '/PT/JS/chat_widget.js';
     script.onload = () => {
       initChatEvents();
     };

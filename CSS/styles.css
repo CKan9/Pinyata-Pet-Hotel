@@ -1,5 +1,4 @@
 /* styles.css */
-
 body {
     font-family: Arial, sans-serif;
     margin: 0;
@@ -259,4 +258,83 @@ nav a:hover {
     .dropdown-content a:hover {
         background-color: #f1f1f1;
     }
+
+    /* Mobile Hamburger Styles */
+.hamburger {
+    display: none; /* Hidden by default on desktop */
+    cursor: pointer;
+    padding: 10px;
+}
+
+.hamburger .bar {
+    display: block;
+    width: 25px;
+    height: 3px;
+    margin: 5px auto;
+    background-color: white;
+    transition: all 0.3s ease;
+}
+
+/* Mobile Navigation */
+@media (max-width: 768px) {
+    /* Hamburger Animation */
+    .hamburger.active .bar:nth-child(1) {
+        transform: translateY(8px) rotate(45deg);
+    }
+    .hamburger.active .bar:nth-child(2) {
+        opacity: 0;
+    }
+    .hamburger.active .bar:nth-child(3) {
+        transform: translateY(-8px) rotate(-45deg);
+    }
+
+    /* Navigation Links */
+    #nav-links {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background-color: rgba(0,76,84,0.9);
+        flex-direction: column;
+        padding: 0;
+        text-align: center;
+    }
+
+    #nav-links.active {
+        display: flex;
+    }
+
+    #nav-links a {
+        margin: 0;
+        padding: 15px 20px;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    /* User Dropdown Adjustments */
+    .user-dropdown {
+        width: 100%;
+        text-align: center;
+    }
+
+    .dropdown-content {
+        position: static;
+        width: 100%;
+        background-color: transparent;
+        box-shadow: none;
+    }
+
+    .dropdown-content a {
+        color: white;
+        padding: 10px 20px;
+    }
+}
+
+/* Ensure logo doesn't get too big on mobile */
+@media (max-width: 480px) {
+    .logo-img {
+        width: 150px;
+        height: auto;
+    }
+}
 }

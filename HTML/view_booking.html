@@ -10,6 +10,37 @@
       loadBookingDetails();
     });
 
+    function checkSession() {
+            fetch('../PHP/sessions.php')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const userNameElement = document.getElementById('userName');
+                        if (userNameElement) userNameElement.textContent = data.username || "UserName";
+
+                        const nav = document.getElementById('nav-links');
+                        const loginBtn = document.getElementById('login-btn');
+                        if (loginBtn) loginBtn.remove();
+
+                        const userMenu = document.createElement('div');
+                        userMenu.innerHTML = `
+                            <div class="user-dropdown">
+                                <a href="#">Hi, ${data.username}</a>
+                                <div class="dropdown-content">
+                                    <a href="guest_dashboard.html">Profile</a>
+                                    <a href="#" id="headerLogout">Log out</a>
+                                </div>
+                            </div>
+                        `;
+                        nav?.appendChild(userMenu);
+                        document.getElementById('headerLogout')?.addEventListener('click', logoutUser);
+                    } else {
+                        window.location.href = '../HTML/login.html';
+                    }
+                })
+                .catch(error => console.error('Session Fetch Error:', error));
+        }
+
     function getBookingIdFromURL() {
       const params = new URLSearchParams(window.location.search);
       return params.get('booking_id'); // match `editBooking()` redirection
@@ -42,7 +73,7 @@
         .catch(error => console.error('Error loading booking details:', error));
     }
 
-    function logout() {
+    function logoutUser() {
             fetch('../PHP/logout.php')
                 .then(() => window.location.href = '/PT/HTML/login.html')
                 .catch(err => console.error("Logout error:", err));
@@ -53,7 +84,7 @@
   <div data-include="header.html"></div>
 
   <div id="mani">
-    <img src="../IMG/hooray.jpg" alt="dashboard">
+    <img src="../IMG/hooray.webp" alt="dashboard">
     <h1>Welcome To Your Dashboard</h1>
 </div>
 
@@ -65,7 +96,7 @@
           <li><a href="guest_dashboard.html">Profile</a></li>
           <li><a href="userbooking.html">Booking</a></li>
           <li><a href="pets.html">Pets</a></li>
-          <li><a href="#" onclick="logout()">Log out</a></li>
+          <li><a href="#" onclick="logoutUser()">Log out</a></li>
         </ul>
       </nav>
     </aside>

@@ -63,7 +63,7 @@
             document.getElementById('headerLogout').addEventListener('click', logoutUser);
         }
 
-        function logout() {
+        function logoutUser() {
             fetch('../PHP/logout.php')
                 .then(() => window.location.href = '/PT/HTML/login.html')
                 .catch(err => console.error("Logout error:", err));

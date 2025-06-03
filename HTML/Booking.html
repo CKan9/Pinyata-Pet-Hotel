@@ -28,7 +28,7 @@
                 .then(data => {
                     const nav = document.getElementById('nav-links');
                     const loginBtn = document.getElementById('login-btn');
-    
+
                     if (data.success) {
                         // Remove login button if exists
                         if (loginBtn) loginBtn.remove();
@@ -44,8 +44,10 @@
                             </div>
                         `;
                         nav.appendChild(userMenu);
-    
+
                         document.getElementById('headerLogout').addEventListener('click', logoutUser);
+                        
+                        loadPets();
                     } else {
                         // Add login if it's not there
                         if (!loginBtn) {
@@ -184,25 +186,47 @@
         <h1>Welcome To My World</h1>
     </div>
 
-    <main>
-        <h2>Book a Stay for Your Pets</h2>
-        <form action="../PHP/process_booking.php" method="POST">
-            <input type="hidden" name="user_id" id="user-id">
+     <main class="booking-container">
+        <section class="admin-form">
+            <h2>Manage Booking</h2>
+            <form action="../PHP/process_booking.php" method="POST" class="form-container">
+                <input type="hidden" name="user_id" id="user-id">
 
-            <label for="start-date">Start Date:</label>
-            <input type="date" name="start_date" id="start-date" required>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Start Date</label>
+                        <input type="date" name="start_date" id="start-date" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>End Date</label>
+                        <input type="date" name="end_date" id="end-date" required>
+                    </div>
+                </div>
 
-            <label for="end-date">End Date:</label>
-            <input type="date" name="end_date" id="end-date" required>
+                <div class="form-row">
+                    <div class="form-group full-width">
+                        <label>Select Pets</label>
+                        <select name="pet_id[]" id="pet-id" multiple required>
+                            <!-- Pets loaded dynamically -->
+                        </select>
+                    </div>
+                </div>
 
-            <label for="pet-id">Select Pets:</label>
-            <select name="pet_id[]" id="pet-id" multiple required></select>
+                <div class="form-row">
+                    <div class="form-group full-width">
+                        <label>Select Room</label>
+                        <select name="room_id" id="room-id" required>
+                            <!-- Rooms loaded dynamically -->
+                        </select>
+                    </div>
+                </div>
 
-            <label for="room-id">Select Room:</label>
-            <select name="room_id" id="room-id" required></select>
-
-            <button type="submit">Confirm Booking</button>
-        </form>
+                <div class="form-actions">
+                    <button type="submit" class="btn-primary">Confirm Booking</button>
+                </div>
+            </form>
+        </section>
     </main>
 
     <div data-include="contact.html"></div>

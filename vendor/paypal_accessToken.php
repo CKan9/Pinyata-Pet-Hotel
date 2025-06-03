@@ -1,6 +1,6 @@
 <?php
 
-require_once __DIR__ . '/paypal_1_config.php';
+require_once __DIR__ . '/paypal_config.php';
 
 function getAccessToken()
 {

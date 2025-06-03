@@ -13,7 +13,7 @@
     <div data-include="header.html"></div>
 
     <div id="mani">
-        <img src="../IMG/hooray.jpg" alt="dashboard">
+        <img src="../IMG/hooray.webp" alt="dashboard">
         <h1>Welcome To Your Dashboard</h1>
     </div>
 
@@ -154,13 +154,12 @@
                 .catch(error => console.error("Error loading pets:", error));
         }
 
-// Redirect to the add_pet.html page with pet_id as a query parameter
-function editPet(pet_id) {
-    window.location.href = `add_pet.html?pet_id=${pet_id}`;
-}
+        function editPet(pet_id) {
+            window.location.href = `add_pet.html?pet_id=${pet_id}`;
+        }
 
         // Logout function
-        function logout() {
+        function logoutUser() {
             fetch('../PHP/logout.php')
                 .then(() => window.location.href = '/PT/HTML/login.html')
                 .catch(err => console.error("Logout error:", err));

@@ -1,7 +1,7 @@
 <?php
 session_start();
-require_once(__DIR__ . '/paypal_1_config.php');
-require_once(__DIR__ . '/paypal_2_accessToken.php');
+require_once(__DIR__ . '/paypal_config.php');
+require_once(__DIR__ . '/paypal_accessToken.php');
 
 if (!isset($_SESSION['paypal_amount'])) {
     die("Error: PayPal amount not set in session.");

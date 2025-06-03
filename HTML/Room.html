@@ -66,18 +66,34 @@
                 .catch(err => console.error("Session Check Error:", err));
         }
     
-        function logout() {
+        function logoutUser() {
             fetch('../PHP/logout.php')
                 .then(() => window.location.href = '/PT/HTML/login.html')
                 .catch(err => console.error("Logout error:", err));
         }
     
         // Call after DOM is ready
-        document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', () => {
             includeHTML(() => {
-                checkSession(); // Check session after header loaded
+                checkSession();
+                setupMobileMenu();
+                // Mobile menu toggle
+                document.querySelector('.hamburger').addEventListener('click', toggleMenu);
             });
         });
+
+        function toggleMenu() {
+            document.getElementById('nav-links').classList.toggle('active');
+            document.querySelector('.hamburger').classList.toggle('active');
+        }
+
+        // Add this new function
+        function setupMobileMenu() {
+            const hamburger = document.querySelector('.hamburger');
+            if (hamburger) {
+                hamburger.addEventListener('click', toggleMenu);
+            }
+        }
     </script>
 </head>
 <body>
