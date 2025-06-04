@@ -116,27 +116,174 @@ input {
     cursor: not-allowed;
 }
 
-.edit-btn {
-    background-color: #007bff;
-    color: white;
-    padding: 4px 8px;
-    text-decoration: none;
+.action-buttons {
+    display: flex;
+    gap: 5px;
+    justify-content: center;
+}
+
+.edit-btn, .delete-btn {
+    padding: 5px 10px;
+    border: none;
     border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
 }
+
+.edit-btn {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.delete-btn {
+    background-color: #f44336;
+    color: white;
+}
+
 .edit-btn:hover {
-    background-color: #0056b3;
+    background-color: #45a049;
 }
 
+.delete-btn:hover {
+    background-color: #d32f2f;
+}
 
+.password-input-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.toggle-password {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    font-size: 14px;
+    color: #666;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.toggle-password:hover {
+    color: #333;
+    background-color: #f0f0f0;
+    border-radius: 50%;
+}
+
+.password-input-wrapper input[type="password"] {
+    padding-right: 35px !important;
+}
+
+/* Mobile Styles */
 @media (max-width: 768px) {
+    #mani {
+        height: 300px;
+    }
+
+    #mani h1 {
+        font-size: 2rem;
+        padding: 0 15px;
+        line-height: 1.3;
+    }
+
     .container {
         flex-direction: column;
     }
+
+    .content {
+        padding: 15px;
+    }
+
+    table {
+        width: 100%;
+        overflow-x: auto;
+        display: block;
+    }
+
+    .filters {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    button, .btn-primary {
+        width: 100%;
+        padding: 15px;
+        font-size: 1.1rem;
+    }
+
+    input, select, textarea {
+        padding: 12px;
+        font-size: 16px;
+    }
+
     .sidebar {
+        width: 100%;
+        padding: 15px;
+        position: relative;
+    }
+
+    .sidebar ul li a {
+        padding: 15px;
+        font-size: 1.1rem;
+    }
+
+    .profile-box {
+        width: 100%;
+        padding: 15px;
+        margin: 15px 0;
+    }
+
+    input {
+        padding: 12px;
+        font-size: 16px;
+    }
+
+    button#updateBtn {
+        padding: 15px;
+        font-size: 1.1rem;
+        width: 100%;
+    }
+
+    /* Mobile menu adjustments */
+    #nav-links {
+        top: 80px !important;
+    }
+
+    .user-dropdown {
         width: 100%;
         text-align: center;
     }
-    .profile-box {
-        width: 90%;
+}
+
+/* Touch optimization */
+@media (hover: none) and (pointer: coarse) {
+    .sidebar ul li {
+        margin: 20px 0;
+    }
+    
+    .sidebar ul li a {
+        padding: 18px;
+        margin: 5px 0;
+    }
+    
+    input {
+        padding: 15px;
+        margin: 10px 0;
+    }
+
+    button, a {
+        padding: 15px;
+        min-height: 48px;
+    }
+
+    table td {
+        padding: 15px;
     }
 }

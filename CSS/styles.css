@@ -278,6 +278,11 @@ nav a:hover {
 /* Mobile Navigation */
 @media (max-width: 768px) {
     /* Hamburger Animation */
+    .hamburger {
+        display: block;
+    }
+
+    /* Hamburger Animation */
     .hamburger.active .bar:nth-child(1) {
         transform: translateY(8px) rotate(45deg);
     }
@@ -289,20 +294,32 @@ nav a:hover {
     }
 
     /* Navigation Links */
+    #navbar {
+        position: relative; /* Add positioning context */
+    }
+
     #nav-links {
         display: none;
         position: absolute;
-        top: 100%;
-        left: 0;
-        right: 0;
+        top: 60px;
+        left: auto;
+        right: 20px;
+        width: 250px;
         background-color: rgba(0,76,84,0.9);
         flex-direction: column;
         padding: 0;
         text-align: center;
+        z-index: 1001; /* Ensure menu appears above content */
+        max-height: 80vx;
+        overflow-y: hidden;
+        transition: max-height 0.3s ease-out;
     }
 
     #nav-links.active {
         display: flex;
+        max-height: 50vh; /* 70% of viewport height */
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
     }
 
     #nav-links a {
@@ -311,8 +328,17 @@ nav a:hover {
         border-bottom: 1px solid rgba(255,255,255,0.1);
     }
 
+    #nav-links::-webkit-scrollbar {
+        width: 6px;
+    }
+    #nav-links::-webkit-scrollbar-thumb {
+        background: rgba(255,255,255,0.3);
+        border-radius: 3px;
+    }
+
     /* User Dropdown Adjustments */
     .user-dropdown {
+        margin-left: 0;
         width: 100%;
         text-align: center;
     }
@@ -327,6 +353,20 @@ nav a:hover {
     .dropdown-content a {
         color: white;
         padding: 10px 20px;
+        background-color: #027373;
+    }
+    .user-dropdown.active .dropdown-content {
+        display: block;
+    }
+
+    .user-dropdown > a::after {
+        content: "▼";
+        margin-left: 8px;
+        font-size: 0.8em;
+    }
+    
+    .user-dropdown.active > a::after {
+        content: "▲";
     }
 }
 

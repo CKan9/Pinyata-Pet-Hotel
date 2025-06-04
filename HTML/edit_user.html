@@ -27,7 +27,7 @@
                 return;
             }
 
-            fetch(`/PT/PHP/get_user_id.php?id=${userId}`)
+            fetch(`../PHP/get_user_id.php?id=${userId}`)
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
@@ -45,7 +45,7 @@
         }
 
         function loadPetDetails(userId) {
-            fetch(`/PT/PHP/get_pets.php?user_id=${userId}`)
+            fetch(`../PHP/get_pets_admin.php?user_id=${userId}`)
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
@@ -59,7 +59,6 @@
                                 <td><img src="${pet.picture_url}" alt="Pet" width="40"></td>
                                 <td>${pet.pet_name}</td>
                                 <td>${pet.pet_type}</td>
-                                <td><button class="tag-btn">New Tag</button></td>
                                 <td><button onclick="editPet(${pet.pet_id})">✏️</button></td>
                             </tr>`;
                         tableBody.innerHTML += row;
@@ -79,7 +78,7 @@
                 password: document.getElementById('password').value
             };
 
-            fetch('/PT/PHP/update_user.php', {
+            fetch('../PHP/update_user_admin.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(userData)
@@ -149,7 +148,6 @@
                         <th>Pet</th>
                         <th>Name</th>
                         <th>Type</th>
-                        <th>Tag</th>
                         <th>Icon</th>
                     </tr>
                 </thead>

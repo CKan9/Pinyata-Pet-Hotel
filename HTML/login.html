@@ -6,22 +6,123 @@
     <title>My Website</title>
     <link rel="stylesheet" href="../CSS/login.css">
     <script>
-        function includeHTML() {
-            let elements = document.querySelectorAll('[data-include]');
+        // Universal include function with callback support
+        function includeHTML(callback) {
+            const elements = document.querySelectorAll('[data-include]');
+            let loaded = 0;
+
+            if (elements.length === 0 && callback) {
+                callback();
+                return;
+            }
+
             elements.forEach(element => {
-                let file = element.getAttribute('data-include');
-                fetch(file)
+                fetch(element.getAttribute('data-include'))
                     .then(response => response.text())
                     .then(data => {
                         element.innerHTML = data;
+                        loaded++;
+                        if (loaded === elements.length && callback) {
+                            callback();
+                        }
                     })
-                    .catch(err => {
-                        console.error('Error loading file:', err);
-                    });
+                    .catch(err => console.error('Error loading include:', err));
             });
         }
 
-        document.addEventListener('DOMContentLoaded', includeHTML);
+        // Form handling functions
+        function handleLogin(event) {
+            event.preventDefault();
+            const username = document.getElementById('loginUsername').value;
+            const password = document.getElementById('loginPassword').value;
+
+            fetch('/PT/PHP/login.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);
+                if (data.success) {
+                    window.location.href = data.role === 'staff' 
+                        ? '/PT/HTML/staff_dashboard.html' 
+                        : '/PT/HTML/guest_dashboard.html';
+                }
+            })
+            .catch(error => {
+                console.error('Login error:', error);
+                alert('Login failed. Please try again.');
+            });
+        }
+
+        function handleRegister(event) {
+            event.preventDefault();
+            const formData = {
+                username: document.getElementById('regUsername').value,
+                email: document.getElementById('regEmail').value,
+                phone: document.getElementById('regPhone').value,
+                newPassword: document.getElementById('regNewPassword').value,
+                confirmPassword: document.getElementById('regConfirmPassword').value
+            };
+
+            if (formData.newPassword !== formData.confirmPassword) {
+                alert('Passwords do not match!');
+                return;
+            }
+
+            fetch('/PT/PHP/register.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);
+                if (data.success) {
+                    document.getElementById('registerContainer').style.display = 'none';
+                    document.getElementById('loginForm').parentElement.style.display = 'block';
+                }
+            })
+            .catch(error => {
+                console.error('Registration error:', error);
+                alert('Registration failed. Please try again.');
+            });
+        }
+
+        // Main initialization
+        document.addEventListener('DOMContentLoaded', () => {
+            includeHTML(() => {
+
+                // Form toggle handlers
+                document.getElementById('showRegister')?.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    document.getElementById('loginForm').parentElement.style.display = 'none';
+                    document.getElementById('registerContainer').style.display = 'block';
+                });
+
+                document.getElementById('showLogin')?.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    document.getElementById('registerContainer').style.display = 'none';
+                    document.getElementById('loginForm').parentElement.style.display = 'block';
+                });
+
+                // Form submission handlers
+                document.getElementById('loginForm')?.addEventListener('submit', handleLogin);
+                document.getElementById('registerForm')?.addEventListener('submit', handleRegister);
+
+                // Password visibility toggle
+                document.querySelectorAll('.toggle-password').forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        const input = e.target.closest('.password-input-wrapper').querySelector('input');
+                        const type = input.type === 'password' ? 'text' : 'password';
+                        input.type = type;
+                        e.target.setAttribute('aria-label', type === 'password' ? 'Show password' : 'Hide password');
+                        e.target.classList.toggle('visible');
+                    });
+                });
+            });
+        });
     </script>
 </head>
 <body>
@@ -37,12 +138,20 @@
             <div class="form-container">
                 <h2>Login</h2>
                 <form id="loginForm">
-                    <label for="username">Username or Email</label>
-                    <input type="text" id="username" name="username" required>
+                    <label for="loginUsername">Username or Email</label>
+                    <input type="text" id="loginUsername" name="username" required>
                     
-                    <label for="password">Password</label>
-                    <input type="password" id="password" name="password" required>
-                    
+                    <div class="password-container">
+                        <label for="loginPassword">Password</label>
+                        <div class="password-input-wrapper">
+                            <input type="password" id="loginPassword" name="password" required>
+                            <button type="button" class="toggle-password" aria-label="Show password">👁</button>
+                        </div>
+                    </div>
+
+                    <p class="forgot-password">
+                        <a href="forgot_password.html">Forgot Password?</a>
+                    </p>
                     <button type="submit">Login</button>
                 </form>
                 <p>Don't have an account? <a href="#" id="showRegister">Register here</a></p>
@@ -51,20 +160,30 @@
             <div class="form-container" id="registerContainer" style="display:none;">
                 <h2>Register</h2>
                 <form id="registerForm">
-                    <label for="username">Username ：</label>
-                    <input type="text" id="username" name="username" required>
+                    <label for="regUsername">Username ：</label>
+                    <input type="text" id="regUsername" name="username" required>
                 
-                    <label for="email">Email ：</label>
-                    <input type="email" id="email" name="email" required>
+                    <label for="regEmail">Email ：</label>
+                    <input type="email" id="regEmail" name="email" required>
                 
-                    <label for="phone">Phone ：</label>
-                    <input type="text" id="phone" name="phone">
+                    <label for="regPhone">Phone ：</label>
+                    <input type="text" id="regPhone" name="phone">
                 
-                    <label for="newPassword">Password ：</label>
-                    <input type="password" id="newPassword" name="newPassword" required>
+                    <div class="password-container">
+                        <label for="regNewPassword">Password ：</label>
+                        <div class="password-input-wrapper">
+                            <input type="password" id="regNewPassword" name="newPassword" required>
+                            <button type="button" class="toggle-password" aria-label="Show password">👁</button>
+                        </div>
+                    </div>
                 
-                    <label for="confirmPassword">Confirm Password ：</label>
-                    <input type="password" id="confirmPassword" name="confirmPassword" required>
+                    <div class="password-container">
+                        <label for="regConfirmPassword">Confirm Password ：</label>
+                        <div class="password-input-wrapper">
+                            <input type="password" id="regConfirmPassword" name="confirmPassword" required>
+                            <button type="button" class="toggle-password" aria-label="Show password">👁</button>
+                        </div>
+                    </div>
                 
                     <button type="submit">Register</button>
                 </form>
@@ -73,91 +192,9 @@
         </div>
     </main>
 
+    <script src="../JS/mobile-menu.js"></script>
     <div data-include="contact.html"></div>
     <div data-include="footer.html"></div>
-
-    <script>
-        document.getElementById('showRegister').addEventListener('click', function(event) {
-            event.preventDefault();
-            document.getElementById('loginForm').parentElement.style.display = 'none';
-            document.getElementById('registerContainer').style.display = 'block';
-        });
-
-        document.getElementById('showLogin').addEventListener('click', function(event) {
-            event.preventDefault();
-            document.getElementById('registerContainer').style.display = 'none';
-            document.getElementById('loginForm').parentElement.style.display = 'block';
-        });
-
-        document.getElementById('loginForm').addEventListener('submit', function(event) {
-    event.preventDefault();
-    const username = document.getElementById('username').value;
-    const password = document.getElementById('password').value;
-
-    console.log("Sending:", { username, password }); // Debugging
-
-    fetch('/PT/PHP/login.php', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ username: username, password: password })
-    })
-    .then(response => response.json())
-    .then(data => {
-        console.log("Response:", data); // Debugging
-        alert(data.message);
-        if (data.success) {
-            window.location.href = data.role === 'staff' ? '/PT/HTML/staff_dashboard.html' : '/PT/HTML/guest_dashboard.html';
-        }
-    })
-    .catch(error => {
-        console.error('Fetch error:', error);
-        alert('An error occurred. Please try again later.');
-    });
-});
-
-        document.getElementById('registerForm').addEventListener('submit', function(event) {
-    event.preventDefault();
-
-    // Get form data properly
-    const username = document.getElementById('username').value;
-    const email = document.getElementById('email').value;
-    const phone = document.getElementById('phone').value;
-    const newPassword = document.getElementById('newPassword').value;
-    const confirmPassword = document.getElementById('confirmPassword').value;
-
-    // Check if passwords match
-    if (newPassword !== confirmPassword) {
-        alert('Passwords do not match.');
-        return;
-    }
-
-    // Prepare JSON object
-    const data = { username, email, phone, newPassword };
-
-    // Send request
-    fetch('/PT/PHP/register.php', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-    })
-    .then(response => response.json())
-    .then(data => {
-        alert(data.message);
-        if (data.success) {
-            document.getElementById('registerContainer').style.display = 'none';
-            document.getElementById('loginForm').parentElement.style.display = 'block';
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('An error occurred. Please try again later.');
-    });
-});
-
-
-    </script>
+    <script src="../JS/chat_loader.js"></script>
 </body>
-<script src="../JS/chat_loader.js"></script>
 </html>

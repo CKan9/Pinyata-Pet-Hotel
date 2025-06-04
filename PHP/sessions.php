@@ -1,53 +1,61 @@
 <?php
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
 session_start();
 header('Content-Type: application/json');
 
-include 'config.php';
+require __DIR__ . '/config.php';
 
-// Check if user is logged in
-if (!isset($_SESSION['user_id']) || !isset($_SESSION['role'])) {
-    echo json_encode(["success" => false, "message" => "User not logged in", "session_data" => $_SESSION]);
-    exit;
-}
+$response = ['success' => false, 'message' => 'Not logged in'];
 
-$user_id = $_SESSION['user_id'];
-$user_role = $_SESSION['role']; // Assuming role is stored in session
+try {
+    if (!isset($_SESSION['user_id']) || !isset($_SESSION['role'])) {
+        echo json_encode($response);
+        exit;
+    }
 
-// Query selection based on role
-if ($user_role == 'staff') {
-    $sql = "SELECT full_name AS username, email FROM admin WHERE admin_id = ?";
-} else {
-    $sql = "SELECT username, email, phone FROM users WHERE user_id = ?";
-}
+    $user_id = $_SESSION['user_id'];
+    $user_role = $_SESSION['role'];
 
-$stmt = $conn->prepare($sql);
-if ($stmt) {
+    if ($user_role == 'staff') {
+        $sql = "SELECT full_name AS username, email FROM admin WHERE admin_id = ?";
+    } else {
+        $sql = "SELECT username, email, phone FROM users WHERE user_id = ?";
+    }
+
+    $stmt = $conn->prepare($sql);
+    if (!$stmt) {
+        throw new Exception("Prepare failed: " . $conn->error);
+    }
+
     $stmt->bind_param("i", $user_id);
-    $stmt->execute();
-    $result = $stmt->get_result();
+    if (!$stmt->execute()) {
+        throw new Exception("Execute failed: " . $stmt->error);
+    }
 
+    $result = $stmt->get_result();
     if ($row = $result->fetch_assoc()) {
-        // Common response fields
         $response = [
             "success" => true,
             "username" => $row["username"],
             "email" => $row["email"]
         ];
 
-        // Include phone only for users
         if ($user_role !== 'staff' && isset($row["phone"])) {
             $response["phone"] = $row["phone"];
         }
-
-        echo json_encode($response);
     } else {
-        echo json_encode(["success" => false, "message" => "User not found"]);
+        $response['message'] = 'User not found';
     }
 
     $stmt->close();
-} else {
-    echo json_encode(["success" => false, "message" => "Database query failed"]);
+} catch (Exception $e) {
+    $response['message'] = 'Error: ' . $e->getMessage();
+    error_log($e->getMessage());
 }
 
 $conn->close();
+echo json_encode($response);
 ?>

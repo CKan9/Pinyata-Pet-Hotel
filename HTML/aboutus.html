@@ -34,25 +34,31 @@
                 .then(data => {
                     const nav = document.getElementById('nav-links');
                     const loginBtn = document.getElementById('login-btn');
-    
+                    const existingDropdown = document.querySelector('.user-dropdown'); // Add this
+
                     if (data.success) {
+                        // Remove existing dropdown if present
+                        if (existingDropdown) existingDropdown.remove(); // Add this
+                        
                         // Remove login button if exists
                         if (loginBtn) loginBtn.remove();
+                        
                         // Add user dropdown
                         const userMenu = document.createElement('div');
-                        userMenu.innerHTML = `
-                            <div class="user-dropdown">
-                                <a href="#">Hi, ${data.username}</a>
+                        userMenu.innerHTML = 
+                            `<div class="user-dropdown">
+                                <a href="#">Hi, ${data.username} </a>
                                 <div class="dropdown-content">
-                                    <a href="guest_dashboard.html">Profile</a>
+                                    <a href="HTML/guest_dashboard.html">Profile</a>
                                     <a href="#" id="headerLogout">Log out</a>
                                 </div>
-                            </div>
-                        `;
+                            </div>`;
                         nav.appendChild(userMenu);
-    
                         document.getElementById('headerLogout').addEventListener('click', logoutUser);
                     } else {
+                        // Remove dropdown if exists when logged out
+                        if (existingDropdown) existingDropdown.remove(); // Add this
+                        
                         // Add login if it's not there
                         if (!loginBtn) {
                             const loginLink = document.createElement('a');
@@ -66,22 +72,16 @@
                 .catch(err => console.error("Session Check Error:", err));
         }
     
-        function logoutUser(e) {
-            e.preventDefault();
-            fetch('../PHP/logout.php', { method: 'POST' })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        window.location.href = '../HTML/login.html';
-                    }
-                })
-                .catch(error => console.error("Logout Error:", error));
+        function logoutUser() {
+            fetch('PHP/logout.php')
+                .then(() => window.location.href = '/PT/HTML/login.html')
+                .catch(err => console.error("Logout error:", err));
         }
-    
-        // Call after DOM is ready
+
+        // Update DOMContentLoaded event
         document.addEventListener('DOMContentLoaded', function () {
             includeHTML(() => {
-                checkSession(); // Check session after header loaded
+                checkSession();
             });
         });
     </script>
@@ -106,7 +106,7 @@
                 <h2>Our Team</h2>
                 <div class="team">
                     <div class="team-member">
-                        <img src="../IMG/team-member1.wenp" alt="John Doe">
+                        <img src="../IMG/team-member1.webp" alt="John Doe">
                         <h3>John Doe</h3>
                         <p>Pet Hotel Manager</p>
                     </div>
@@ -131,6 +131,7 @@
         </section>
     </main>
 
+    <script src="../JS/mobile-menu.js"></script>
     <div data-include="contact.html"></div>
     <div data-include="footer.html"></div>
 </body>

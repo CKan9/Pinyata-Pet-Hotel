@@ -6,8 +6,32 @@
   <title>View Booking</title>
   <link rel="stylesheet" href="../CSS/dashboard.css" />
   <script>
-    document.addEventListener("DOMContentLoaded", function () {
-      loadBookingDetails();
+
+    // Update DOMContentLoaded event
+    document.addEventListener('DOMContentLoaded', function () {
+        const includes = document.querySelectorAll('[data-include]');
+        includes.forEach(element => {
+            fetch(element.getAttribute('data-include'))
+                .then(response => response.text())
+                .then(data => {
+                    element.innerHTML = data;
+                    if (element.getAttribute('data-include') === 'header.html') {
+                        checkSession();
+                        setupMobileMenu();
+                    }
+                });
+        });
+
+        loadBookingDetails();
+        
+        document.addEventListener('click', (e) => {
+            const navLinks = document.getElementById('nav-links');
+            const hamburger = document.querySelector('.hamburger');
+            if (!e.target.closest('#navbar') && navLinks.classList.contains('active')) {
+                navLinks.classList.remove('active');
+                hamburger.classList.remove('active');
+            }
+        });
     });
 
     function checkSession() {
@@ -116,6 +140,8 @@
     </main>
   </div>
 
+  <script src="../JS/mobile-menu.js"></script>
+  <div data-include="contact.html"></div>
   <div data-include="footer.html"></div>
   <script src="../JS/chat_loader.js"></script>
 </body>

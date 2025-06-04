@@ -6,79 +6,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Available Rooms</title>
     <link rel="stylesheet" href="../CSS/dashboard.css">
-</head>
-
-<body>
-    <!-- Header Include -->
-
-    <div class="container">
-        <!-- Sidebar -->
-        <aside class="sidebar">
-            <h2 id="userName">UserName</h2>
-            <nav>
-                <ul>
-                    <li><a href="staff_dashboard.html">Dashboard</a></li>
-                    <li><a href="admin_booking.html">Manage Bookings</a></li>
-                    <li><a href="#">Rooms</a></li>
-                    <li><a href="#" onclick="logout()">Log out</a></li>
-                </ul>
-            </nav>
-        </aside>
-
-        <!-- Main Content -->
-        <main class="content">
-            <h1>Available Rooms</h1>
-
-            <!-- Filter Rooms -->
-            <div class="filters">
-                <label for="searchRoomType">Room Type:</label>
-                    <select id="searchRoomType">
-                        <option value="">All</option>
-                    </select>
-
-                    <label for="searchPetType">Pet Type:</label>
-                    <select id="searchPetType">
-                        <option value="">All</option>
-                    </select>
-
-
-                <button onclick="loadRooms()">Search</button>
-            </div>
-
-            <table>
-                <thead>
-                    <tr>
-                        <th>Room ID</th>
-                        <th>Type</th>
-                        <th>Description</th>
-                        <th>Capacity</th>
-                        <th>Price/Day</th>
-                        <th>Availability</th>
-                        <th>Pet Type</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody id="roomTableBody"></tbody>
-            </table>
-        </main>
-    </div>
-
-    <!-- Footer Include -->
-    <div data-include="footer.html"></div>
-
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            includeHTML(() => {
-                checkSession();
-                loadFilterOptions(); // <-- load dropdown options
-                loadRooms();
-                bindLogoutButton();
+        // Define all functions first
+        function bindLogoutButton() {
+            const logoutLinks = document.querySelectorAll('[onclick="logout()"]');
+            logoutLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    logout();
+                });
             });
-        });
+        }
 
         function includeHTML(callback) {
             const includes = document.querySelectorAll('[data-include]');
             let loaded = 0;
+
+            if (includes.length === 0 && callback) {
+                callback();
+                return;
+            }
 
             includes.forEach(element => {
                 fetch(element.getAttribute('data-include'))
@@ -140,7 +87,6 @@
                 .catch(error => console.error("Room Fetch Error:", error));
         }
 
-
         function loadFilterOptions() {
             fetch('../PHP/get_room_filters.php')
                 .then(response => response.json())
@@ -169,13 +115,81 @@
                 .catch(error => console.error("Filter Fetch Error:", error));
         }
 
-
         function logout() {
             fetch('../PHP/logout.php')
                 .then(() => window.location.href = '/PT/HTML/login.html')
                 .catch(err => console.error("Logout error:", err));
         }
+
+        // Initialize when DOM is ready
+        document.addEventListener("DOMContentLoaded", function () {
+            includeHTML(() => {
+                checkSession();
+                loadFilterOptions();
+                loadRooms();
+                bindLogoutButton();
+            });
+        });
     </script>
+</head>
+
+<body>
+    <!-- Header Include -->
+    <div data-include="header.html"></div>
+
+    <div class="container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <h2 id="userName">UserName</h2>
+            <nav>
+                <ul>
+                    <li><a href="staff_dashboard.html">Dashboard</a></li>
+                    <li><a href="admin_booking.html">Manage Bookings</a></li>
+                    <li><a href="#">Rooms</a></li>
+                    <li><a href="#" onclick="logout()">Log out</a></li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="content">
+            <h1>Rooms</h1>
+
+            <!-- Filter Rooms -->
+            <div class="filters">
+                <label for="searchRoomType">Room Type:</label>
+                <select id="searchRoomType">
+                    <option value="">All</option>
+                </select>
+
+                <label for="searchPetType">Pet Type:</label>
+                <select id="searchPetType">
+                    <option value="">All</option>
+                </select>
+
+                <button onclick="loadRooms()">Search</button>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Room ID</th>
+                        <th>Type</th>
+                        <th>Description</th>
+                        <th>Capacity</th>
+                        <th>Price/Day</th>
+                        <th>Availability</th>
+                        <th>Pet Type</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="roomTableBody"></tbody>
+            </table>
+        </main>
+    </div>
+
+    <!-- Footer Include -->
+    <div data-include="footer.html"></div>
 
     <script src="../JS/chat_loader.js"></script>
 </body>

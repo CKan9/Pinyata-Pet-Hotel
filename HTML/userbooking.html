@@ -6,6 +6,144 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>User Manage Booking</title>
     <link rel="stylesheet" href="../CSS/dashboard.css">
+
+    <script>
+        // Update includeHTML function
+        function includeHTML(callback) {
+            const includes = document.querySelectorAll('[data-include]');
+            let loaded = 0;
+
+            if (includes.length === 0 && callback) {
+                callback();
+                return;
+            }
+
+            includes.forEach(element => {
+                fetch(element.getAttribute('data-include'))
+                    .then(response => response.text())
+                    .then(data => {
+                        element.innerHTML = data;
+                        loaded++;
+                        if (loaded === includes.length && callback) callback();
+                    })
+                    .catch(err => console.error('Error loading file:', err));
+            });
+        }
+
+        // Update DOMContentLoaded event
+        document.addEventListener('DOMContentLoaded', function () {
+            includeHTML(() => {
+                checkSession();
+                loadBookings();
+                bindLogoutButton();
+            });
+        });
+
+        function checkSession() {
+            fetch('../PHP/sessions.php')
+                .then(response => response.json())
+                .then(data => {
+                    const nav = document.getElementById('nav-links');
+                    const loginBtn = document.getElementById('login-btn');
+                    const existingDropdown = document.querySelector('.user-dropdown');
+
+                    if (data.success) {
+                        if (existingDropdown) existingDropdown.remove();
+                        if (loginBtn) loginBtn.remove();
+                        
+                        if (nav) {
+                            const userMenu = document.createElement('div');
+                            userMenu.innerHTML = 
+                                `<div class="user-dropdown">
+                                    <a href="#">Hi, ${data.username} </a>
+                                    <div class="dropdown-content">
+                                        <a href="HTML/guest_dashboard.html">Profile</a>
+                                        <a href="#" id="headerLogout">Log out</a>
+                                    </div>
+                                </div>`;
+                            nav.appendChild(userMenu);
+                            
+                            const headerLogout = document.getElementById('headerLogout');
+                            if (headerLogout) {
+                                headerLogout.addEventListener('click', logoutUser);
+                            }
+                        }
+                    } else {
+                        if (existingDropdown) existingDropdown.remove();
+                        if (nav && !loginBtn) {
+                            const loginLink = document.createElement('a');
+                            loginLink.href = "login.html";
+                            loginLink.id = "login-btn";
+                            loginLink.textContent = "Login";
+                            nav.appendChild(loginLink);
+                        }
+                    }
+                })
+                .catch(err => console.error("Session Check Error:", err));
+        }
+
+        function loadBookings() {
+            const date = document.getElementById('searchDate')?.value;
+            const petId = document.getElementById('searchPet')?.value;
+            const status = document.getElementById('searchStatus')?.value;
+
+            const params = new URLSearchParams();
+            if (date) params.append('date', date);
+            if (petId) params.append('pet_id', petId);
+            if (status) params.append('status', status);
+
+            fetch(`../PHP/get_user_bookings.php?${params.toString()}`)
+                .then(response => response.json())
+                .then(data => {
+                    const bookingTable = document.getElementById('bookingTableBody');
+                    if (bookingTable) {
+                        bookingTable.innerHTML = '';
+                        if (data.success) {
+                            data.bookings.forEach((booking) => {
+                                bookingTable.innerHTML += `
+                                    <tr>
+                                        <td>${booking.pet_id}</td>
+                                        <td>${booking.start_date}</td>
+                                        <td>${booking.end_date}</td>
+                                        <td><span class="status ${booking.booking_status}">${booking.booking_status}</span></td>
+                                        <td><button onclick="editBooking(${booking.booking_id})">👁</button></td>
+                                    </tr>
+                                `;
+                            });
+                        } else {
+                            console.error("Booking Error:", data.message);
+                        }
+                    }
+                })
+                .catch(error => console.error("Booking Fetch Error:", error));
+        }
+
+        function editBooking(booking_id) {
+            window.location.href = `view_booking.html?booking_id=${booking_id}`;
+        }
+
+        function bindLogoutButton() {
+            const logoutBtn = document.getElementById("logoutBtn");
+            if (logoutBtn) {
+                logoutBtn.addEventListener("click", function (e) {
+                    e.preventDefault();
+                    fetch('../PHP/logout.php', { method: 'POST' })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) window.location.href = '../HTML/login.html';
+                        })
+                        .catch(error => console.error("Logout Error:", error));
+                });
+            }
+        }
+
+        function logoutUser(e) {
+            if (e) e.preventDefault();
+            fetch('../PHP/logout.php')
+                .then(() => window.location.href = '/PT/HTML/login.html')
+                .catch(err => console.error("Logout error:", err));
+        }
+    </script>
 </head>
 
 <body>
@@ -70,121 +208,9 @@
         </main>
     </div>
 
-    <!-- Footer Include -->
+    <script src="../JS/mobile-menu.js"></script>
+    <div data-include="contact.html"></div>
     <div data-include="footer.html"></div>
-
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            includeHTML(() => {
-                checkSession();
-                loadBookings();
-                bindLogoutButton();
-            });
-        });
-
-        function includeHTML(callback) {
-            const includes = document.querySelectorAll('[data-include]');
-            let loaded = 0;
-
-            includes.forEach(element => {
-                fetch(element.getAttribute('data-include'))
-                    .then(response => response.text())
-                    .then(data => {
-                        element.innerHTML = data;
-                        loaded++;
-                        if (loaded === includes.length && callback) callback();
-                    })
-                    .catch(err => console.error('Error loading file:', err));
-            });
-        }
-
-        function checkSession() {
-            fetch('../PHP/sessions.php')
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        const userNameElement = document.getElementById('userName');
-                        if (userNameElement) userNameElement.textContent = data.username || "UserName";
-
-                        const nav = document.getElementById('nav-links');
-                        const loginBtn = document.getElementById('login-btn');
-                        if (loginBtn) loginBtn.remove();
-
-                        const userMenu = document.createElement('div');
-                        userMenu.innerHTML = `
-                            <div class="user-dropdown">
-                                <a href="#">Hi, ${data.username}</a>
-                                <div class="dropdown-content">
-                                    <a href="guest_dashboard.html">Profile</a>
-                                    <a href="#" id="headerLogout">Log out</a>
-                                </div>
-                            </div>
-                        `;
-                        nav?.appendChild(userMenu);
-                        document.getElementById('headerLogout')?.addEventListener('click', logoutUser);
-                    } else {
-                        window.location.href = '../HTML/login.html';
-                    }
-                })
-                .catch(error => console.error('Session Fetch Error:', error));
-        }
-
-        function loadBookings() {
-            const date = document.getElementById('searchDate').value;
-            const petId = document.getElementById('searchPet').value;
-            const status = document.getElementById('searchStatus').value;
-
-            const params = new URLSearchParams();
-            if (date) params.append('date', date);
-            if (petId) params.append('pet_id', petId);
-            if (status) params.append('status', status);
-
-            fetch(`../PHP/get_user_bookings.php?${params.toString()}`)
-                .then(response => response.json())
-                .then(data => {
-                    const bookingTable = document.getElementById('bookingTableBody');
-                    bookingTable.innerHTML = '';
-                    if (data.success) {
-                        data.bookings.forEach((booking) => {
-                            bookingTable.innerHTML += `
-                                <tr>
-                                    <td>${booking.pet_id}</td>
-                                    <td>${booking.start_date}</td>
-                                    <td>${booking.end_date}</td>
-                                    <td><span class="status ${booking.booking_status}">${booking.booking_status}</span></td>
-                                    <td><button onclick="editBooking(${booking.booking_id})">👁</button></td>
-                                </tr>
-                            `;
-                        });
-                    } else {
-                        console.error("Booking Error:", data.message);
-                    }
-                })
-                .catch(error => console.error("Booking Fetch Error:", error));
-        }
-
-        function editBooking(booking_id) {
-            window.location.href = `view_booking.html?booking_id=${booking_id}`;
-        }
-
-        function bindLogoutButton() {
-            document.getElementById("logoutBtn").addEventListener("click", function (e) {
-                e.preventDefault();
-                fetch('../PHP/logout.php', { method: 'POST' })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) window.location.href = '../HTML/login.html';
-                    })
-                    .catch(error => console.error("Logout Error:", error));
-            });
-        }
-
-        function logoutUser() {
-            fetch('../PHP/logout.php')
-                .then(() => window.location.href = '/PT/HTML/login.html')
-                .catch(err => console.error("Logout error:", err));
-        }
-    </script>
 
     <script src="../JS/chat_loader.js"></script>
 </body>

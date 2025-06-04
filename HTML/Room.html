@@ -34,25 +34,31 @@
                 .then(data => {
                     const nav = document.getElementById('nav-links');
                     const loginBtn = document.getElementById('login-btn');
-    
+                    const existingDropdown = document.querySelector('.user-dropdown'); // Add this
+
                     if (data.success) {
+                        // Remove existing dropdown if present
+                        if (existingDropdown) existingDropdown.remove(); // Add this
+                        
                         // Remove login button if exists
                         if (loginBtn) loginBtn.remove();
+                        
                         // Add user dropdown
                         const userMenu = document.createElement('div');
-                        userMenu.innerHTML = `
-                            <div class="user-dropdown">
-                                <a href="#">Hi, ${data.username}</a>
+                        userMenu.innerHTML = 
+                            `<div class="user-dropdown">
+                                <a href="#">Hi, ${data.username} </a>
                                 <div class="dropdown-content">
-                                    <a href="guest_dashboard.html">Profile</a>
+                                    <a href="HTML/guest_dashboard.html">Profile</a>
                                     <a href="#" id="headerLogout">Log out</a>
                                 </div>
-                            </div>
-                        `;
+                            </div>`;
                         nav.appendChild(userMenu);
-    
                         document.getElementById('headerLogout').addEventListener('click', logoutUser);
                     } else {
+                        // Remove dropdown if exists when logged out
+                        if (existingDropdown) existingDropdown.remove(); // Add this
+                        
                         // Add login if it's not there
                         if (!loginBtn) {
                             const loginLink = document.createElement('a');
@@ -76,24 +82,8 @@
         document.addEventListener('DOMContentLoaded', () => {
             includeHTML(() => {
                 checkSession();
-                setupMobileMenu();
-                // Mobile menu toggle
-                document.querySelector('.hamburger').addEventListener('click', toggleMenu);
             });
         });
-
-        function toggleMenu() {
-            document.getElementById('nav-links').classList.toggle('active');
-            document.querySelector('.hamburger').classList.toggle('active');
-        }
-
-        // Add this new function
-        function setupMobileMenu() {
-            const hamburger = document.querySelector('.hamburger');
-            if (hamburger) {
-                hamburger.addEventListener('click', toggleMenu);
-            }
-        }
     </script>
 </head>
 <body>
@@ -197,6 +187,7 @@
         </div>
     </main>
 
+    <script src="../JS/mobile-menu.js"></script>
     <div data-include="contact.html"></div>
     <div data-include="footer.html"></div>
 </body>
