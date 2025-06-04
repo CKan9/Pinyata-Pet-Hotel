@@ -6,66 +6,75 @@
     <title>My Website</title>
     <link rel="stylesheet" href="../CSS/facilitys.css">
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // Load included HTML elements
-            document.querySelectorAll('[data-include]').forEach(async (el) => {
-                const file = el.getAttribute('data-include');
-                if (file) {
-                    const response = await fetch(file);
-                    if (response.ok) {
-                        el.innerHTML = await response.text();
-                        if (file === 'header.html') {
-                            checkSession(); // Call session check after header loads
+        // Include function stays as-is
+        function includeHTML(callback) {
+            let elements = document.querySelectorAll('[data-include]');
+            let loaded = 0;
+            elements.forEach(element => {
+                let file = element.getAttribute('data-include');
+                fetch(file)
+                    .then(response => response.text())
+                    .then(data => {
+                        element.innerHTML = data;
+                        loaded++;
+                        if (loaded === elements.length && callback) {
+                            callback();
                         }
-                    } else {
-                        el.innerHTML = 'Failed to load content.';
-                    }
-                }
+                    })
+                    .catch(err => {
+                        console.error('Error loading file:', err);
+                    });
             });
-
-            loadFacilityDetails();
-        });
-
-        // Function to check session and redirect if not logged in
+        }
+    
+        // Session check inside every page without external file
         function checkSession() {
             fetch('../PHP/sessions.php')
                 .then(response => response.json())
                 .then(data => {
-                    if (!data.success) {
-                        alert('You need to log in to access this page.');
-                        window.location.href = 'login.html'; // Redirect to login page
+                    const nav = document.getElementById('nav-links');
+                    const loginBtn = document.getElementById('login-btn');
+                    const existingDropdown = document.querySelector('.user-dropdown');
+
+                    if (data.success) {
+                        // Remove existing dropdown if present
+                        if (existingDropdown) existingDropdown.remove();
+                        
+                        // Remove login button if exists
+                        if (loginBtn) loginBtn.remove();
+                        
+                        // Add user dropdown
+                        const userMenu = document.createElement('div');
+                        userMenu.innerHTML = 
+                            `<div class="user-dropdown">
+                                <a href="#">Hi, ${data.username} </a>
+                                <div class="dropdown-content">
+                                    <a href="../HTML/guest_dashboard.html">Profile</a>
+                                    <a href="#" id="headerLogout">Log out</a>
+                                </div>
+                            </div>`;
+                        nav.appendChild(userMenu);
+                        document.getElementById('headerLogout').addEventListener('click', logoutUser);
                     } else {
-                        updateNavbar(data.username);
+                        // Remove dropdown if exists when logged out
+                        if (existingDropdown) existingDropdown.remove();
+                        
+                        // Add login if it's not there
+                        if (!loginBtn) {
+                            const loginLink = document.createElement('a');
+                            loginLink.href = "../HTML/login.html";
+                            loginLink.id = "login-btn";
+                            loginLink.textContent = "Login";
+                            nav.appendChild(loginLink);
+                        }
                     }
                 })
                 .catch(err => console.error("Session Check Error:", err));
         }
-
-        // Function to update navbar with user details
-        function updateNavbar(username) {
-            const nav = document.getElementById('nav-links');
-            const loginBtn = document.getElementById('login-btn');
-
-            if (loginBtn) loginBtn.remove(); // Remove login button if logged in
-
-            const userMenu = document.createElement('div');
-            userMenu.innerHTML = `
-                <div class="user-dropdown">
-                    <a href="#">Hi, ${username}</a>
-                    <div class="dropdown-content">
-                        <a href="guest_dashboard.html">Profile</a>
-                        <a href="#" id="headerLogout">Log out</a>
-                    </div>
-                </div>
-            `;
-            nav.appendChild(userMenu);
-
-            document.getElementById('headerLogout').addEventListener('click', logoutUser);
-        }
-
+    
         function logoutUser() {
             fetch('../PHP/logout.php')
-                .then(() => window.location.href = '/PT/HTML/login.html')
+                .then(() => window.location.href = '../HTML/login.html')
                 .catch(err => console.error("Logout error:", err));
         }
 
@@ -92,6 +101,14 @@
                 });
             }
         }
+
+        // Update DOMContentLoaded event
+        document.addEventListener('DOMContentLoaded', function () {
+            includeHTML(() => {
+                checkSession();
+                loadFacilityDetails();
+            });
+        });
     </script>
 </head>
 <body>
@@ -241,6 +258,7 @@
     </main>
 
 
+    <script src="../JS/mobile-menu.js"></script>
     <div data-include="contact.html"></div>
     <div data-include="footer.html"></div>
 </body>

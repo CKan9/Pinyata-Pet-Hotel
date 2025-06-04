@@ -1,13 +1,186 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Add Pet</title>
     <link rel="stylesheet" href="../CSS/dashboard.css">
-</head>
+    <script>
+        // Include function
+        function includeHTML(callback) {
+            const elements = document.querySelectorAll('[data-include]');
+            let loaded = 0;
+            
+            elements.forEach(element => {
+                const file = element.getAttribute('data-include');
+                fetch(file)
+                    .then(response => response.text())
+                    .then(data => {
+                        element.innerHTML = data;
+                        loaded++;
+                        if (loaded === elements.length && callback) {
+                            callback();
+                        }
+                    })
+                    .catch(err => console.error('Include Error:', err));
+            });
+        }
 
+        // Session management
+        function checkSession() {
+            fetch('../PHP/sessions.php')
+                .then(response => response.json())
+                .then(data => {
+                    const nav = document.getElementById('nav-links');
+                    const loginBtn = document.getElementById('login-btn');
+                    const existingDropdown = document.querySelector('.user-dropdown');
+
+                    // Clean existing elements
+                    if (existingDropdown) existingDropdown.remove();
+                    if (loginBtn) loginBtn.remove();
+
+                    if (data.success) {
+                        // Create user dropdown
+                        const userMenu = document.createElement('div');
+                        userMenu.innerHTML = `
+                            <div class="user-dropdown">
+                                <a href="#">Hi, ${data.username}</a>
+                                <div class="dropdown-content">
+                                    <a href="guest_dashboard.html">Profile</a>
+                                    <a href="#" id="headerLogout">Log out</a>
+                                </div>
+                            </div>`;
+                        nav.appendChild(userMenu);
+                        
+                        // Add logout handler
+                        document.getElementById('headerLogout').addEventListener('click', logoutUser);
+                    } else {
+                        // Create login button
+                        const loginLink = document.createElement('a');
+                        loginLink.href = "login.html";
+                        loginLink.id = "login-btn";
+                        loginLink.textContent = "Login";
+                        nav.appendChild(loginLink);
+                    }
+                })
+                .catch(err => console.error("Session Check Error:", err));
+        }
+
+        function logoutUser() {
+            fetch('../PHP/logout.php')
+                .then(() => window.location.href = '../HTML/login.html')
+                .catch(err => console.error("Logout error:", err));
+        }
+
+        
+
+        // Form functionality
+        function initializeForm() {
+            // Back button
+            document.getElementById('backButton').addEventListener('click', () => window.history.back());
+
+            // Image preview
+            document.getElementById('petPicture').addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        const imgPreview = document.getElementById('imagePreview');
+                        imgPreview.src = e.target.result;
+                        imgPreview.style.display = "block";
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            // Form submission
+            document.getElementById('addPetForm').addEventListener('submit', async (event) => {
+                event.preventDefault();
+                
+                const submitButton = document.getElementById('submitButton');
+                submitButton.disabled = true;
+                submitButton.textContent = 'Processing...';
+
+                try {
+                    const petId = new URLSearchParams(window.location.search).get('pet_id');
+                    const url = petId ? '../PHP/update_pet.php' : '../PHP/add_pet.php';
+                    const formData = new FormData(event.target);
+
+                    if (petId) formData.append('pet_id', petId);
+
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    // Handle non-JSON responses
+                    const textResponse = await response.text();
+                    let data;
+                    try {
+                        data = JSON.parse(textResponse);
+                    } catch (e) {
+                        throw new Error(`Invalid server response: ${textResponse.slice(0, 100)}...`);
+                    }
+
+                    if (!response.ok) {
+                        throw new Error(data.message || `HTTP error! status: ${response.status}`);
+                    }
+
+                    if (data.success) {
+                        window.location.href = data.redirect || '../HTML/pets.html';
+                    } else {
+                        alert(`Error: ${data.message}`);
+                    }
+                } catch (error) {
+                    console.error('Submission Error:', error);
+                    alert(`Operation failed: ${error.message}`);
+                } finally {
+                    submitButton.disabled = false;
+                    submitButton.textContent = petId ? 'Update Pet' : 'Add Pet';
+                }
+            });
+        }
+
+        // Main initialization
+        document.addEventListener('DOMContentLoaded', () => {
+            includeHTML(() => {
+                checkSession();
+                initializeForm();
+                loadPetData();
+            });
+        });
+
+        // Pet data loading
+        function loadPetData() {
+            const petId = new URLSearchParams(window.location.search).get('pet_id');
+            if (!petId) return;
+
+            fetch(`../PHP/get_pet_by_id.php?pet_id=${petId}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        const pet = data.pet;
+                        // Update form fields
+                        document.querySelector("h2").textContent = `Edit Pet: ${pet.pet_name}`;
+                        document.getElementById('submitButton').textContent = "Update Pet";
+                        document.getElementById('petName').value = pet.pet_name;
+                        document.getElementById('petType').value = pet.pet_type;
+                        document.getElementById('breed').value = pet.breed;
+                        document.getElementById('age').value = pet.age;
+                        document.getElementById('specialNotes').value = pet.special_notes || "";
+
+                        // Handle existing picture
+                        if (pet.picture_url) {
+                            const imgPreview = document.getElementById('imagePreview');
+                            imgPreview.src = pet.picture_url;
+                            imgPreview.style.display = "block";
+                        }
+                    }
+                })
+                .catch(err => console.error("Fetch Error:", err));
+        }
+    </script>
+</head>
 <body>
     <!-- Header Include -->
     <div data-include="header.html"></div>
@@ -41,7 +214,9 @@
                     <option value="Dog">Dog</option>
                     <option value="Cat">Cat</option>
                     <option value="Bird">Bird</option>
-                    <option value="Other">Other</option>
+                    <option value="Rabbit">Rabbit</option>
+                    <option value="Hamster">Hamster</option>
+                    <option value="Reptile">Reptile</option>
                 </select>
 
                 <label>Breed:</label>
@@ -63,166 +238,9 @@
         </main>
     </div>
 
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            checkSession();           // Check session
-            bindEventListeners();     // Bind button clicks
-            loadPetData();            // If editing, pre-fill form
-        });
-
-        // Check if user is logged in
-        function checkSession() {
-            fetch('../PHP/sessions.php')
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        // Update username display
-                        const userNameElement = document.getElementById('userName');
-                        if (userNameElement) userNameElement.textContent = data.username || "UserName";
-
-                        // Modify navigation UI
-                        const nav = document.getElementById('nav-links');
-                        const loginBtn = document.getElementById('login-btn');
-                        if (loginBtn) loginBtn.remove();
-
-                        // Create user dropdown menu
-                        const userMenu = document.createElement('div');
-                        userMenu.innerHTML = `
-                            <div class="user-dropdown">
-                                <a href="#">Hi, ${data.username}</a>
-                                <div class="dropdown-content">
-                                    <a href="guest_dashboard.html">Profile</a>
-                                    <a href="#" id="headerLogout">Log out</a>
-                                </div>
-                            </div>
-                        `;
-                        nav.appendChild(userMenu);
-
-                        // Bind logout functionality
-                        document.getElementById('headerLogout').addEventListener('click', logoutUser);
-                    } else {
-                        // Redirect if session is not valid
-                        window.location.href = '../HTML/login.html';
-                    }
-                })
-                .catch(error => console.error('Session Fetch Error:', error));
-        }
-
-        function logoutUser() {
-            fetch('../PHP/logout.php')
-                .then(() => window.location.href = '/PT/HTML/login.html')
-                .catch(err => console.error("Logout error:", err));
-        }
-
-        // Button Events
-        function bindEventListeners() {
-            document.getElementById('logoutBtn').addEventListener('click', function (e) {
-                e.preventDefault();
-                fetch('../PHP/logout.php', { method: 'POST' })
-                    .then(res => res.json())
-                    .then(data => {
-                        if (data.success) window.location.href = '../HTML/login.html';
-                    })
-                    .catch(err => console.error("Logout Error:", err));
-            });
-
-            document.getElementById('backButton').addEventListener('click', () => window.history.back());
-
-            // Preview selected image
-            document.getElementById('petPicture').addEventListener('change', function (e) {
-                const file = e.target.files[0];
-                if (file) {
-                    const reader = new FileReader();
-                    reader.onload = function (e) {
-                        const imgPreview = document.getElementById('imagePreview');
-                        imgPreview.src = e.target.result;
-                        imgPreview.style.display = "block";
-                    };
-                    reader.readAsDataURL(file);
-                }
-            });
-
-            // Form submit: Add or Update Pet
-            document.getElementById('addPetForm').addEventListener('submit', function (event) {
-            event.preventDefault();
-
-            const petId = new URLSearchParams(window.location.search).get('pet_id');
-            const url = petId ? '../PHP/update_pet.php' : '../PHP/add_pet.php';
-            const formData = new FormData(this);
-
-            // 👇 Safely append pet_id
-            if (petId) {
-                formData.append('pet_id', petId);
-            }
-
-            // 👇 Handle existing picture
-            const fileInput = document.getElementById('petPicture');
-            const existingPictureInput = document.getElementById('existingPicture');
-            const existingPicture = existingPictureInput ? existingPictureInput.value : '';
-
-            if (existingPicture) {
-                formData.append('existing_picture', existingPicture);
-            }
-
-
-            fetch(url, {
-                method: 'POST',
-                body: formData
-            })
-            .then(res => res.json())
-            .then(data => {
-                alert(data.message);
-                if (data.success) {
-                    window.location.href = "pets.html";
-                }
-            })
-            .catch(err => console.error("Submit Error:", err));
-        });
-
-        }
-
-        // If editing, load data into form
-        function loadPetData() {
-            const petId = new URLSearchParams(window.location.search).get('pet_id');
-            if (!petId) return;
-
-            fetch(`../PHP/get_pet_by_id.php?pet_id=${petId}`)
-                .then(res => res.json())
-                .then(data => {
-                    if (data.success) {
-                        const pet = data.pet;
-                        document.querySelector("h2").textContent = `Edit Pet: ${pet.pet_name}`;
-                        document.getElementById('submitButton').textContent = "Update Pet";
-
-                        document.getElementById('petName').value = pet.pet_name;
-                        document.getElementById('petType').value = pet.pet_type;
-                        document.getElementById('breed').value = pet.breed;
-                        document.getElementById('age').value = pet.age;
-                        document.getElementById('specialNotes').value = pet.special_notes || "";
-
-                        // Set existing picture URL if available
-                        if (!document.getElementById('existingPicture')) {
-                            const hiddenInput = document.createElement('input');
-                            hiddenInput.type = 'hidden';
-                            hiddenInput.name = 'existing_picture';
-                            hiddenInput.id = 'existingPicture';
-                            document.getElementById('addPetForm').appendChild(hiddenInput);
-                        }
-                        document.getElementById('existingPicture').value = pet.picture_url;
-
-                        // Display existing picture if available
-                        if (pet.picture_url) {
-                            const img = document.getElementById('imagePreview');
-                            img.src = pet.picture_url;
-                            img.style.display = "block";
-                        }
-                    } else {
-                        console.error("Load Error:", data.message);
-                    }
-                })
-                .catch(err => console.error("Fetch Error:", err));
-        }
-</script>
+    <script src="../JS/mobile-menu.js"></script>
+    <div data-include="contact.html"></div>
+    <div data-include="footer.html"></div>
 </body>
 <script src="../JS/chat_loader.js"></script>
 </html>

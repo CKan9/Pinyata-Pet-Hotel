@@ -27,14 +27,14 @@
                 return;
             }
 
-            fetch(`/PT/PHP/get_user_id.php?id=${userId}`)
+            fetch(`../PHP/get_user_id.php?id=${userId}`)
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
                     document.getElementById('username').value = data.user.username;
                     document.getElementById('email').value = data.user.email;
                     document.getElementById('phone').value = data.user.phone;
-                    document.getElementById('password').value = data.user.password;
+                    document.getElementById('password').value = '';
                     loadPetDetails(userId);
                 } else {
                     alert('User not found');
@@ -45,7 +45,7 @@
         }
 
         function loadPetDetails(userId) {
-            fetch(`/PT/PHP/get_pets.php?user_id=${userId}`)
+            fetch(`../PHP/get_pets_admin.php?user_id=${userId}`)
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
@@ -59,7 +59,6 @@
                                 <td><img src="${pet.picture_url}" alt="Pet" width="40"></td>
                                 <td>${pet.pet_name}</td>
                                 <td>${pet.pet_type}</td>
-                                <td><button class="tag-btn">New Tag</button></td>
                                 <td><button onclick="editPet(${pet.pet_id})">✏️</button></td>
                             </tr>`;
                         tableBody.innerHTML += row;
@@ -75,11 +74,16 @@
                 id: userId,
                 username: document.getElementById('username').value,
                 email: document.getElementById('email').value,
-                phone: document.getElementById('phone').value,
-                password: document.getElementById('password').value
+                phone: document.getElementById('phone').value
             };
 
-            fetch('/PT/PHP/update_user.php', {
+            // Only include password if it was actually entered
+            const passwordInput = document.getElementById('password');
+            if (passwordInput.value.trim() !== '') {
+                userData.password = passwordInput.value;
+            }
+
+            fetch('/PT/PHP/update_user_admin.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(userData)
@@ -115,7 +119,7 @@
             <nav>
                 <ul>
                     <li><a href="staff_dashboard.html">Dashboard</a></li>
-                    <li><a href="manage_bookings.html">Manage Bookings</a></li>
+                    <li><a href="admin_booking.html">Manage Bookings</a></li>
                     <li><a href="admin_room.html">Rooms</a></li>
                     <li><a href="#" onclick="logout()">Log out</a></li>
                 </ul>
@@ -135,7 +139,7 @@
                 <input type="text" id="phone">
 
                 <label>Password:</label>
-                <input type="password" id="password">
+                <input type="password" id="password" placeholder="Leave blank to keep current password">
 
                 <button type="submit">Update</button>
                 <button type="button" id="backButton">Back</button>
@@ -149,7 +153,6 @@
                         <th>Pet</th>
                         <th>Name</th>
                         <th>Type</th>
-                        <th>Tag</th>
                         <th>Icon</th>
                     </tr>
                 </thead>

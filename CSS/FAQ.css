@@ -77,3 +77,71 @@ main {
 .faq-answer p {
     margin: 0;
 }
+
+/* Mobile Styles */
+@media (max-width: 768px) {
+    #mani {
+        height: 300px;
+    }
+
+    #mani h1 {
+        font-size: 2rem;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+    }
+
+    #faq-container {
+        margin: 20px 10px;
+        padding: 15px;
+        width: calc(100% - 20px);
+    }
+
+    .faq-item {
+        margin-bottom: 15px;
+        padding: 10px;
+    }
+
+    .faq-question {
+        font-size: 1.1rem;
+        padding: 12px;
+        position: relative;
+    }
+
+    .faq-question::after {
+        content: '+';
+        position: absolute;
+        right: 15px;
+        font-size: 1.5rem;
+    }
+
+    .faq-question.active::after {
+        content: '-';
+    }
+
+    .faq-answer {
+        padding: 10px 15px;
+        font-size: 0.95rem;
+    }
+
+    /* Mobile menu adjustments */
+    #nav-links {
+        top: 80px !important;
+    }
+
+    .user-dropdown {
+        width: 100%;
+        text-align: center;
+    }
+}
+
+/* Touch optimization */
+@media (hover: none) and (pointer: coarse) {
+    .faq-question {
+        padding: 15px;
+        font-size: 1.2rem;
+    }
+    
+    .faq-answer {
+        padding: 15px;
+        line-height: 1.5;
+    }
+}

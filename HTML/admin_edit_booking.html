@@ -37,7 +37,6 @@
             document.getElementById('end_date').value = booking.end_date;
             document.getElementById('total_amount').value = booking.total_amount;
             document.getElementById('booking_status').value = booking.booking_status;
-            document.getElementById('managed_by').value = booking.managed_by;
           } else {
             alert('Booking not found');
             window.location.href = 'admin_manage_user_bookings.html';
@@ -100,7 +99,6 @@
             <option value="Completed">Completed</option>
           </select>
         </p>
-        <p><strong>Managed By (Staff ID):</strong> <input type="number" id="managed_by" name="managed_by" /></p>
         <br />
         <button type="submit">Save Changes</button>
         <button type="button" onclick="window.location.href='admin_manage_user_bookings.html'">Cancel</button>

@@ -107,3 +107,121 @@ a:hover {
     font-size: 48px; /* Adjust font size as needed */
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); /* Optional: adds a shadow for better readability */
 }
+
+.password-input-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.toggle-password {
+    position: absolute;
+    right: 8px;
+    top: 20%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    font-size: 14px;
+    color: #666;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.toggle-password:hover {
+    color: #333;
+    background-color: #f0f0f0;
+    border-radius: 50%;
+}
+
+/* Add padding to input to prevent text overlap */
+input[type="password"],
+input[type="text"] {
+    padding-right: 35px !important;
+}
+
+.message {
+    padding: 10px;
+    margin: 15px 0;
+    border-radius: 4px;
+}
+
+.message.success {
+    background-color: #dff0d8;
+    color: #3c763d;
+}
+
+.message.error {
+    background-color: #f2dede;
+    color: #a94442;
+}
+
+/* Mobile Styles */
+@media (max-width: 768px) {
+    #mani {
+        height: 300px;
+    }
+
+    #mani h1 {
+        font-size: 2rem;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+    }
+
+    .about-us {
+        margin: 20px 10px;
+        padding: 15px;
+        width: calc(100% - 20px);
+    }
+
+    .team {
+        flex-direction: column;
+    }
+
+    .team-member {
+        flex: 1 1 100%;
+        margin: 15px 0;
+    }
+
+    .team-member img {
+        width: 120px;
+        height: 120px;
+    }
+
+    .about-us h2 {
+        font-size: 1.5rem;
+        margin-bottom: 15px;
+    }
+
+    .about-us p {
+        font-size: 1rem;
+        padding: 0 10px;
+    }
+
+    /* Mobile menu adjustments */
+    #nav-links {
+        top: 80px !important;
+    }
+
+    .user-dropdown {
+        width: 100%;
+        text-align: center;
+    }
+}
+
+/* Touch optimization */
+@media (hover: none) and (pointer: coarse) {
+    .team-member {
+        padding: 15px;
+    }
+    
+    .about-us h2 {
+        font-size: 1.3rem;
+    }
+    
+    .about-us p {
+        line-height: 1.5;
+    }
+}

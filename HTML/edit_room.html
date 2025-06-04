@@ -17,7 +17,7 @@
                 <ul>
                     <li><a href="staff_dashboard.html">Dashboard</a></li>
                     <li><a href="admin_booking.html">Manage Bookings</a></li>
-                    <li><a href="admin_rooms.html">Rooms</a></li>
+                    <li><a href="admin_room.html">Rooms</a></li>
                     <li><a href="#" onclick="logout()">Log out</a></li>
                 </ul>
             </nav>
@@ -57,85 +57,98 @@
     </div>
 
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            checkSession();
-            bindLogoutButton();
-            const roomId = new URLSearchParams(window.location.search).get("room_id");
-            if (roomId) {
-                fetchRoomDetails(roomId);
-            } else {
-                alert("Missing room ID.");
-                window.location.href = "admin_rooms.html";
-            }
-
-            document.getElementById("editRoomForm").addEventListener("submit", function (e) {
+    // Add this function definition
+    function bindLogoutButton() {
+        const logoutLinks = document.querySelectorAll('[onclick="logout()"]');
+        logoutLinks.forEach(link => {
+            link.addEventListener('click', function(e) {
                 e.preventDefault();
-                updateRoom();
+                logout();
             });
         });
+    }
 
-        function checkSession() {
-            fetch('../PHP/sessions.php')
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        document.getElementById('userName').textContent = data.username || "Staff";
-                    } else {
-                        window.location.href = '/PT/HTML/login.html';
-                    }
-                })
-                .catch(error => console.error('Session Fetch Error:', error));
+    document.addEventListener("DOMContentLoaded", function () {
+        checkSession();
+        bindLogoutButton(); // Now this will work
+        const roomId = new URLSearchParams(window.location.search).get("room_id");
+        if (roomId) {
+            fetchRoomDetails(roomId);
+        } else {
+            alert("Missing room ID.");
+            window.location.href = "admin_room.html";
         }
 
-        function logout() {
-            fetch('../PHP/logout.php')
-                .then(() => window.location.href = '/PT/HTML/login.html')
-                .catch(err => console.error("Logout error:", err));
-        }
+        document.getElementById("editRoomForm").addEventListener("submit", function (e) {
+            e.preventDefault();
+            updateRoom();
+        });
+    });
 
-        function fetchRoomDetails(roomId) {
-            fetch(`../PHP/get_room_by_id.php?room_id=${roomId}`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        const room = data.room;
-                        document.getElementById("room_id").value = room.room_id;
-                        document.getElementById("room_type").value = room.room_type;
-                        document.getElementById("description").value = room.description;
-                        document.getElementById("capacity").value = room.capacity;
-                        document.getElementById("price_per_day").value = room.price_per_day;
-                        document.getElementById("availability").value = room.availability;
-                        document.getElementById("pet_type").value = room.pet_type;
-                    } else {
-                        alert("Failed to load room data.");
-                        window.location.href = "admin_rooms.html";
-                    }
-                })
-                .catch(error => {
-                    console.error("Error fetching room details:", error);
-                });
-        }
-
-        function updateRoom() {
-            const formData = new FormData(document.getElementById("editRoomForm"));
-            fetch('../PHP/update_room.php', {
-                method: 'POST',
-                body: formData
+    function checkSession() {
+        fetch('../PHP/sessions.php')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('userName').textContent = data.username || "Staff";
+                } else {
+                    window.location.href = '/PT/HTML/login.html';
+                }
             })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        alert("Room updated successfully!");
-                        window.location.href = "admin_rooms.html";
-                    } else {
-                        alert("Failed to update room.");
-                    }
-                })
-                .catch(error => {
-                    console.error("Update Error:", error);
-                });
-        }
-    </script>
+            .catch(error => console.error('Session Fetch Error:', error));
+    }
+
+    function logout() {
+        fetch('../PHP/logout.php')
+            .then(() => window.location.href = '/PT/HTML/login.html')
+            .catch(err => console.error("Logout error:", err));
+    }
+
+    function fetchRoomDetails(roomId) {
+        fetch(`../PHP/get_room_by_id.php?room_id=${roomId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const room = data.room;
+                    document.getElementById("room_id").value = room.room_id;
+                    document.getElementById("room_type").value = room.room_type;
+                    document.getElementById("description").value = room.description;
+                    document.getElementById("capacity").value = room.capacity;
+                    document.getElementById("price_per_day").value = room.price_per_day;
+                    document.getElementById("availability").value = room.availability;
+                    document.getElementById("pet_type").value = room.pet_type;
+                } else {
+                    alert("Failed to load room data.");
+                    window.location.href = "admin_room.html";
+                }
+            })
+            .catch(error => {
+                console.error("Error fetching room details:", error);
+            });
+    }
+
+    function updateRoom() {
+        const formData = new FormData(document.getElementById("editRoomForm"));
+        fetch('../PHP/update_room.php', {
+            method: 'POST',
+            body: formData
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert("Room updated successfully!");
+                    window.location.href = "admin_room.html";
+                } else {
+                    alert("Failed to update room.");
+                }
+            })
+            .catch(error => {
+                console.error("Update Error:", error);
+            });
+    }
+</script>
+
+    <div data-include="footer.html"></div>
 </body>
 
 </html>

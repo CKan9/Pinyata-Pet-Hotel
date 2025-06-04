@@ -6,6 +6,183 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Pets</title>
     <link rel="stylesheet" href="../CSS/dashboard.css">
+
+    <script>
+        // Update includeHTML function
+        function includeHTML(callback) {
+            const includes = document.querySelectorAll('[data-include]');
+            let loaded = 0;
+
+            if (includes.length === 0 && callback) {
+                callback();
+                return;
+            }
+
+            includes.forEach(element => {
+                fetch(element.getAttribute('data-include'))
+                    .then(response => response.text())
+                    .then(data => {
+                        element.innerHTML = data;
+                        loaded++;
+                        if (loaded === includes.length && callback) {
+                            callback();
+                        }
+                    })
+                    .catch(err => console.error('Error loading file:', err));
+            });
+        }
+
+        // Update DOMContentLoaded event
+        document.addEventListener('DOMContentLoaded', function () {
+            includeHTML(() => {
+                checkSession();
+                loadPets();
+                bindLogoutButton();
+                bindAddPetButton();  // Moved this to be called after includes are loaded
+            });
+        });
+
+        // Check if user is logged in
+        function checkSession() {
+            fetch('../PHP/sessions.php')
+                .then(response => response.json())
+                .then(data => {
+                    const nav = document.getElementById('nav-links');
+                    const loginBtn = document.getElementById('login-btn');
+                    const existingDropdown = document.querySelector('.user-dropdown');
+
+                    if (data.success) {
+                        if (existingDropdown) existingDropdown.remove();
+                        if (loginBtn) loginBtn.remove();
+                        
+                        if (nav) {
+                            const userMenu = document.createElement('div');
+                            userMenu.innerHTML = 
+                                `<div class="user-dropdown">
+                                    <a href="#">Hi, ${data.username} </a>
+                                    <div class="dropdown-content">
+                                        <a href="guest_dashboard.html">Profile</a>
+                                        <a href="#" id="headerLogout">Log out</a>
+                                    </div>
+                                </div>`;
+                            nav.appendChild(userMenu);
+                            
+                            const headerLogout = document.getElementById('headerLogout');
+                            if (headerLogout) {
+                                headerLogout.addEventListener('click', logoutUser);
+                            }
+                        }
+                    } else {
+                        if (existingDropdown) existingDropdown.remove();
+                        if (nav && !loginBtn) {
+                            const loginLink = document.createElement('a');
+                            loginLink.href = "login.html";
+                            loginLink.id = "login-btn";
+                            loginLink.textContent = "Login";
+                            nav.appendChild(loginLink);
+                        }
+                    }
+                })
+                .catch(err => console.error("Session Check Error:", err));
+        }
+
+        // Load pets dynamically
+        function loadPets() {
+            fetch('../PHP/get_pets.php')
+                .then(response => response.json())
+                .then(data => {
+                    const petsTable = document.getElementById('petsTableBody');
+                    if (petsTable) {
+                        petsTable.innerHTML = '';
+                        
+                        if (data.success) {
+                            data.pets.forEach((pet, index) => {
+                                petsTable.innerHTML += `
+                                    <tr>
+                                        <td>${index + 1}</td>
+                                        <td>${pet.pet_name || 'No Name'}</td>
+                                        <td>${pet.pet_type || 'No Type'}</td>
+                                        <td>${pet.breed || 'No Breed'}</td>
+                                        <td>${pet.age || 'No Age'}</td>
+                                        <td><img src="${pet.picture_url || 'default.png'}" alt="Pet Icon" width="50"></td>
+                                        <td class="action-buttons">
+                                            <button onclick="editPet(${pet.pet_id})" class="edit-btn">✎</button>
+                                            <button onclick="deletePet(${pet.pet_id})" class="delete-btn">🗑️</button>
+                                        </td>
+                                    </tr>
+                                `;
+                            });
+                        } else {
+                            console.error("Error: ", data.message);
+                        }
+                    }
+                })
+                .catch(error => console.error("Error loading pets:", error));
+        }
+
+        function editPet(pet_id) {
+            window.location.href = `add_pet.html?pet_id=${pet_id}`;
+        }
+
+        // Delete pet function
+        function deletePet(pet_id) {
+            if (confirm('Are you sure you want to delete this pet?')) {
+                fetch('../PHP/delete_pet.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `pet_id=${pet_id}`
+                })
+                .then(response => {
+                    // First check if the response is JSON
+                    const contentType = response.headers.get('content-type');
+                    if (!contentType || !contentType.includes('application/json')) {
+                        return response.text().then(text => {
+                            throw new Error(text || 'Invalid response from server');
+                        });
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        alert('Pet deleted successfully');
+                        loadPets(); // Refresh the pets list
+                    } else {
+                        alert('Error deleting pet: ' + (data.message || 'Unknown error'));
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error deleting pet: ' + error.message);
+                });
+            }
+        }
+
+        // Logout function
+        function logoutUser(e) {
+            if (e) e.preventDefault();
+            fetch('../PHP/logout.php')
+                .then(() => window.location.href = '/PT/HTML/login.html')
+                .catch(err => console.error("Logout error:", err));
+        }
+
+        function bindLogoutButton() {
+            const logoutBtn = document.getElementById('logoutBtn');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', logoutUser);
+            }
+        }
+
+        function bindAddPetButton() {
+            const addPetBtn = document.getElementById('addPetBtn');
+            if (addPetBtn) {
+                addPetBtn.addEventListener('click', function() {
+                    window.location.href = "add_pet.html";
+                });
+            }
+        }
+    </script>
 </head>
 
 <body>
@@ -43,7 +220,7 @@
                         <th>Breed</th>
                         <th>Age</th>
                         <th>Picture</th>
-                        <th>Icon</th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody id="petsTableBody">
@@ -54,122 +231,8 @@
         </main>
     </div>
 
-    <!-- Footer Include -->
+    <div data-include="contact.html"></div>
     <div data-include="footer.html"></div>
-
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            includeHTML(() => {
-                checkSession();
-                loadPets();
-                bindLogoutButton();
-            });
-        });
-
-        // Universal include function
-        function includeHTML(callback) {
-            const includes = document.querySelectorAll('[data-include]');
-            let loaded = 0;
-
-            includes.forEach(element => {
-                fetch(element.getAttribute('data-include'))
-                .then(response => response.text())
-                .then(data => {
-                    element.innerHTML = data;
-                    loaded++;
-                    if (loaded === includes.length && callback) {
-                        callback();
-                    }
-                })
-                .catch(err => console.error('Error loading file:', err));
-            });
-        }
-
-        // Check if user is logged in
-        function checkSession() {
-            fetch('../PHP/sessions.php')
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        // Update username display
-                        const userNameElement = document.getElementById('userName');
-                        if (userNameElement) userNameElement.textContent = data.username || "UserName";
-
-                        // Modify navigation UI
-                        const nav = document.getElementById('nav-links');
-                        const loginBtn = document.getElementById('login-btn');
-                        if (loginBtn) loginBtn.remove();
-
-                        // Create user dropdown menu
-                        const userMenu = document.createElement('div');
-                        userMenu.innerHTML = `
-                            <div class="user-dropdown">
-                                <a href="#">Hi, ${data.username}</a>
-                                <div class="dropdown-content">
-                                    <a href="guest_dashboard.html">Profile</a>
-                                    <a href="#" id="headerLogout">Log out</a>
-                                </div>
-                            </div>
-                        `;
-                        nav.appendChild(userMenu);
-
-                        // Bind logout functionality
-                        document.getElementById('headerLogout').addEventListener('click', logoutUser);
-                    } else {
-                        // Redirect if session is not valid
-                        window.location.href = '../HTML/login.html';
-                    }
-                })
-                .catch(error => console.error('Session Fetch Error:', error));
-        }
-
-        // Load pets dynamically
-        function loadPets() {
-            fetch('../PHP/get_pets.php')
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        const petsTable = document.getElementById('petsTableBody');
-                        petsTable.innerHTML = '';
-
-                        data.pets.forEach((pet, index) => {
-                            petsTable.innerHTML += `
-                                <tr>
-                                    <td>${index + 1}</td>
-                                    <td>${pet.pet_name || 'No Name'}</td>
-                                    <td>${pet.pet_type || 'No Type'}</td>
-                                    <td>${pet.breed || 'No Breed'}</td>
-                                    <td>${pet.age || 'No Age'}</td>
-                                    <td><img src="${pet.picture_url || 'default.png'}" alt="Pet Icon" width="50"></td>
-                                    <td>
-                                        <button onclick="editPet(${pet.pet_id})">✎</button>
-                                    </td>
-                                </tr>
-                            `;
-                        });
-                    } else {
-                        console.error("Error: ", data.message);
-                    }
-                })
-                .catch(error => console.error("Error loading pets:", error));
-        }
-
-        function editPet(pet_id) {
-            window.location.href = `add_pet.html?pet_id=${pet_id}`;
-        }
-
-        // Logout function
-        function logoutUser() {
-            fetch('../PHP/logout.php')
-                .then(() => window.location.href = '/PT/HTML/login.html')
-                .catch(err => console.error("Logout error:", err));
-        }
-
-        // Redirect to add pet page
-        document.getElementById("addPetBtn").addEventListener("click", function () {
-            window.location.href = "add_pet.html";
-        });
-    </script>
+    <script src="../JS/chat_loader.js"></script>
 </body>
-<script src="../JS/chat_loader.js"></script>
 </html>

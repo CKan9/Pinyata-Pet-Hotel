@@ -1,115 +1,121 @@
 <?php
-session_start();
-include '../PHP/config.php';
+// Enable error logging and disable display
+ini_set('display_errors', 0);
+ini_set('log_errors', 1);
+ini_set('error_log', 'php_errors.log');
 header('Content-Type: application/json');
 
-if (!isset($_SESSION['user_id'])) {
-    echo json_encode(["success" => false, "message" => "User not logged in"]);
-    exit();
-}
+try {
+    session_start();
+    require_once '../PHP/config.php'; // Use require_once for critical includes
 
-if (!isset($_POST['pet_id'])) {
-    echo json_encode(["success" => false, "message" => "Pet ID is missing"]);
-    exit();
-}
-
-$pet_id = $_POST['pet_id'];
-$user_id = $_SESSION['user_id'];
-$pet_name = $_POST['pet_name'];
-$pet_type = $_POST['pet_type'];
-$breed = $_POST['breed'];
-$age = $_POST['age'];
-$special_notes = $_POST['special_notes'] ?? '';
-
-// Default upload directories
-$upload_dir = "../IMG/uploads/";
-$web_img_path = "../IMG/uploads/";
-
-// Step 1: Ensure existing_picture is valid
-$picture_url = null;
-if (isset($_POST['existing_picture']) && $_POST['existing_picture'] !== "0" && $_POST['existing_picture'] !== "") {
-    $picture_url = $_POST['existing_picture'];
-}
-
-// Step 2: Handle new uploaded image
-if (!empty($_FILES['pet_picture']['name']) && is_uploaded_file($_FILES['pet_picture']['tmp_name'])) {
-    $file_type = mime_content_type($_FILES['pet_picture']['tmp_name']);
-    $allowed_types = ['image/jpeg', 'image/png', 'image/gif', 'image/jpg'];
-
-    if (!in_array($file_type, $allowed_types)) {
-        echo json_encode(["success" => false, "message" => "Invalid file type"]);
-        exit();
+    // Validate session and input
+    if (!isset($_SESSION['user_id'])) {
+        throw new Exception("User not logged in", 401);
     }
 
-    if (!is_dir($upload_dir)) {
-        mkdir($upload_dir, 0755, true);
+    if (!isset($_POST['pet_id']) || empty($_POST['pet_id'])) {
+        throw new Exception("Pet ID is required", 400);
     }
 
-    // Save new file with unique name
-    $unique_filename = uniqid() . "_" . basename($_FILES['pet_picture']['name']);
-    $target_path = $upload_dir . $unique_filename;
+    $pet_id = (int)$_POST['pet_id'];
+    $user_id = (int)$_SESSION['user_id'];
 
-    if (move_uploaded_file($_FILES['pet_picture']['tmp_name'], $target_path)) {
-        $new_picture_url = $web_img_path . $unique_filename;
-
-        // Delete old file if it's different
-        if (!empty($picture_url)) {
-            $existing_filename = basename($picture_url);
-            $new_filename = basename($new_picture_url);
-            if ($existing_filename !== $new_filename) {
-                $old_path = $upload_dir . $existing_filename;
-                if (file_exists($old_path)) {
-                    unlink($old_path);
-                }
-            }
-        }
-
-        // Update picture_url to new one
-        $picture_url = $new_picture_url;
-    } else {
-        echo json_encode(["success" => false, "message" => "Failed to move uploaded file"]);
-        exit();
-    }
-}
-
-// Step 3: Fallback if no image uploaded or missing in form
-if (!$picture_url) {
-    $stmt = $conn->prepare("SELECT picture_url FROM pets WHERE pet_id = ? AND user_id = ?");
-    $stmt->bind_param("ii", $pet_id, $user_id);
+    // Validate ownership
+    $stmt = $conn->prepare("SELECT user_id FROM pets WHERE pet_id = ?");
+    $stmt->bind_param("i", $pet_id);
     $stmt->execute();
     $result = $stmt->get_result();
-    if ($row = $result->fetch_assoc()) {
-        $picture_url = $row['picture_url'];
+    
+    if ($result->num_rows === 0) {
+        throw new Exception("Pet not found", 404);
     }
-    $stmt->close();
-}
+    
+    if ($result->fetch_assoc()['user_id'] !== $user_id) {
+        throw new Exception("Unauthorized access", 403);
+    }
 
-// Step 4: Update the pet info in DB
-if ($picture_url) {
-    $sql = "UPDATE pets SET pet_name=?, pet_type=?, breed=?, age=?, special_notes=?, picture_url=? WHERE pet_id=? AND user_id=?";
+    // Process data
+    $pet_name = htmlspecialchars($_POST['pet_name']);
+    $pet_type = htmlspecialchars($_POST['pet_type']);
+    $breed = htmlspecialchars($_POST['breed']);
+    $age = (int)$_POST['age'];
+    $special_notes = htmlspecialchars($_POST['special_notes'] ?? '');
+    $picture_url = null;
+
+    // Handle file upload
+    if (!empty($_FILES['pet_picture']['name']) && is_uploaded_file($_FILES['pet_picture']['tmp_name'])) {
+        $upload_dir = realpath("../IMG/uploads/") . DIRECTORY_SEPARATOR;
+        $allowed_types = ['image/jpeg', 'image/png', 'image/gif'];
+        
+        // Validate file type
+        $finfo = new finfo(FILEINFO_MIME_TYPE);
+        $file_type = $finfo->file($_FILES['pet_picture']['tmp_name']);
+        
+        if (!in_array($file_type, $allowed_types)) {
+            throw new Exception("Invalid file type. Only JPG, PNG, and GIF are allowed", 415);
+        }
+
+        // Create directory if needed
+        if (!is_dir($upload_dir)) {
+            mkdir($upload_dir, 0755, true);
+        }
+
+        // Generate unique filename
+        $extension = pathinfo($_FILES['pet_picture']['name'], PATHINFO_EXTENSION);
+        $filename = uniqid('pet_', true) . '.' . $extension;
+        $target_path = $upload_dir . $filename;
+
+        if (!move_uploaded_file($_FILES['pet_picture']['tmp_name'], $target_path)) {
+            throw new Exception("Failed to save uploaded file", 500);
+        }
+
+        $picture_url = "../IMG/uploads/" . $filename;
+    }
+
+    // Build SQL query
+    $sql = "UPDATE pets SET 
+            pet_name = ?, 
+            pet_type = ?, 
+            breed = ?, 
+            age = ?, 
+            special_notes = ?" 
+            . ($picture_url ? ", picture_url = ?" : "") . 
+            " WHERE pet_id = ?";
+
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("sssisssi", $pet_name, $pet_type, $breed, $age, $special_notes, $picture_url, $pet_id, $user_id);
-} else {
-    $sql = "UPDATE pets SET pet_name=?, pet_type=?, breed=?, age=?, special_notes=? WHERE pet_id=? AND user_id=?";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("sssissi", $pet_name, $pet_type, $breed, $age, $special_notes, $pet_id, $user_id);
+    
+    // Bind parameters
+    $params = [$pet_name, $pet_type, $breed, $age, $special_notes];
+    if ($picture_url) {
+        $params[] = $picture_url;
+    }
+    $params[] = $pet_id;
+
+    $types = str_repeat('s', count($params));
+    $stmt->bind_param($types, ...$params);
+
+    if (!$stmt->execute()) {
+        throw new Exception("Database update failed: " . $stmt->error, 500);
+    }
+
+    echo json_encode([
+        'success' => true,
+        'message' => 'Pet updated successfully',
+        'redirect' => '../HTML/pets.html'
+    ]);
+
+} catch (Exception $e) {
+    http_response_code($e->getCode() ?: 500);
+    error_log('Pet Update Error: ' . $e->getMessage());
+    echo json_encode([
+        'success' => false,
+        'message' => $e->getMessage(),
+        'code' => $e->getCode()
+    ]);
+} finally {
+    if (isset($stmt)) $stmt->close();
+    if (isset($conn)) $conn->close();
+    exit();
 }
-
-file_put_contents("debug_update_log.txt", json_encode([
-    "pet_id" => $pet_id,
-    "user_id" => $user_id,
-    "picture_url_final" => $picture_url,
-    "existing_picture_input" => $_POST['existing_picture'],
-    "new_file_uploaded" => $_FILES['pet_picture']['name'] ?? 'none'
-], JSON_PRETTY_PRINT) . PHP_EOL, FILE_APPEND);
-
-
-if ($stmt->execute()) {
-    echo json_encode(["success" => true, "message" => "Pet updated successfully"]);
-} else {
-    echo json_encode(["success" => false, "message" => "Database update failed", "error" => $stmt->error]);
-}
-
-$stmt->close();
-$conn->close();
 ?>

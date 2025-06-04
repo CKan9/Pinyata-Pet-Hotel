@@ -14,6 +14,9 @@
                     .then(response => response.text())
                     .then(data => {
                         element.innerHTML = data;
+                        if (file === 'header.html') {
+                            checkSession();
+                        }
                         loaded++;
                         if (loaded === elements.length && callback) {
                             callback();
@@ -23,44 +26,48 @@
         }
 
         function checkSession() {
-            fetch('../PHP/sessions.php')
-                .then(response => response.json())
-                .then(data => {
-                    const nav = document.getElementById('nav-links');
-                    const loginBtn = document.getElementById('login-btn');
+    fetch('../PHP/sessions.php')
+        .then(response => response.json())
+        .then(data => {
+            // Target both desktop and mobile nav elements
+            const desktopNav = document.getElementById('nav-links');
+            const mobileNav = document.getElementById('mobile-nav-links'); // Add matching ID in mobile menu HTML
 
-                    if (data.success) {
-                        // Remove login button if exists
-                        if (loginBtn) loginBtn.remove();
-                        // Add user dropdown
-                        const userMenu = document.createElement('div');
-                        userMenu.innerHTML = `
-                            <div class="user-dropdown">
-                                <a href="#">Hi, ${data.username}</a>
-                                <div class="dropdown-content">
-                                    <a href="guest_dashboard.html">Profile</a>
-                                    <a href="#" id="headerLogout">Log out</a>
-                                </div>
+            [desktopNav, mobileNav].forEach(nav => {
+                if (!nav) return; // Skip if mobile nav not found
+
+                const loginBtn = nav.querySelector('#login-btn');
+                const existingDropdown = nav.querySelector('.user-dropdown');
+
+                if (data.success) {
+                    if (existingDropdown) existingDropdown.remove();
+                    if (loginBtn) loginBtn.remove();
+
+                    const userMenu = document.createElement('div');
+                    userMenu.innerHTML = 
+                        `<div class="user-dropdown">
+                            <a href="#">Hi, ${data.username} </a>
+                            <div class="dropdown-content">
+                                <a href="../HTML/guest_dashboard.html">Profile</a>
+                                <a href="#" id="headerLogout">Log out</a>
                             </div>
-                        `;
-                        nav.appendChild(userMenu);
-
-                        document.getElementById('headerLogout').addEventListener('click', logoutUser);
-                        
-                        loadPets();
-                    } else {
-                        // Add login if it's not there
-                        if (!loginBtn) {
-                            const loginLink = document.createElement('a');
-                            loginLink.href = "login.html";
-                            loginLink.id = "login-btn";
-                            loginLink.textContent = "Login";
-                            nav.appendChild(loginLink);
-                        }
+                        </div>`;
+                    nav.appendChild(userMenu);
+                    nav.querySelector('#headerLogout').addEventListener('click', logoutUser);
+                } else {
+                    if (existingDropdown) existingDropdown.remove();
+                    if (!loginBtn) {
+                        const loginLink = document.createElement('a');
+                        loginLink.href = "login.html";
+                        loginLink.id = "login-btn";
+                        loginLink.textContent = "Login";
+                        nav.appendChild(loginLink);
                     }
-                })
-                .catch(err => console.error("Session Check Error:", err));
-        }
+                }
+            });
+        })
+        .catch(err => console.error("Session Check Error:", err));
+}
 
         function loadPets() {
             fetch(`../PHP/get_pets_inbooking.php`)
@@ -146,35 +153,29 @@
             });
         }
 
-        function logoutUser(e) {
-            e.preventDefault();
-            fetch('../PHP/logout.php', { method: 'POST' })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        window.location.href = '../HTML/login.html';
-                    }
-                })
-                .catch(error => console.error("Logout Error:", error));
+        function logoutUser() {
+            fetch('../PHP/logout.php')
+                .then(() => window.location.href = '/PT/HTML/login.html')
+                .catch(err => console.error("Logout error:", err));
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-    includeHTML(() => {
-        checkSession();
+            includeHTML(() => {
+                checkSession();
+                loadPets();
+                document.getElementById("pet-id").addEventListener("change", () => {
+                    loadAvailableRooms();
+                });
 
-        document.getElementById("pet-id").addEventListener("change", () => {
-            loadAvailableRooms();
-        });
+                document.getElementById("start-date").addEventListener("change", () => {
+                    loadAvailableRooms();
+                });
 
-        document.getElementById("start-date").addEventListener("change", () => {
-            loadAvailableRooms();
+                document.getElementById("end-date").addEventListener("change", () => {
+                    loadAvailableRooms();
+                });
+            });
         });
-
-        document.getElementById("end-date").addEventListener("change", () => {
-            loadAvailableRooms();
-        });
-    });
-});
 
     </script>
 </head>
@@ -229,6 +230,7 @@
         </section>
     </main>
 
+    <script src="../JS/mobile-menu.js"></script>
     <div data-include="contact.html"></div>
     <div data-include="footer.html"></div>
 </body>

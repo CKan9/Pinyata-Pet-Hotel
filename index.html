@@ -34,25 +34,31 @@
                 .then(data => {
                     const nav = document.getElementById('nav-links');
                     const loginBtn = document.getElementById('login-btn');
-    
+                    const existingDropdown = document.querySelector('.user-dropdown'); // Add this
+
                     if (data.success) {
+                        // Remove existing dropdown if present
+                        if (existingDropdown) existingDropdown.remove(); // Add this
+                        
                         // Remove login button if exists
                         if (loginBtn) loginBtn.remove();
+                        
                         // Add user dropdown
                         const userMenu = document.createElement('div');
-                        userMenu.innerHTML = `
-                            <div class="user-dropdown">
-                                <a href="#">Hi, ${data.username}</a>
+                        userMenu.innerHTML = 
+                            `<div class="user-dropdown">
+                                <a href="#">Hi, ${data.username} </a>
                                 <div class="dropdown-content">
                                     <a href="HTML/guest_dashboard.html">Profile</a>
                                     <a href="#" id="headerLogout">Log out</a>
                                 </div>
-                            </div>
-                        `;
+                            </div>`;
                         nav.appendChild(userMenu);
-    
                         document.getElementById('headerLogout').addEventListener('click', logoutUser);
                     } else {
+                        // Remove dropdown if exists when logged out
+                        if (existingDropdown) existingDropdown.remove(); // Add this
+                        
                         // Add login if it's not there
                         if (!loginBtn) {
                             const loginLink = document.createElement('a');
@@ -72,35 +78,10 @@
                 .catch(err => console.error("Logout error:", err));
         }
 
-        // Add this to your existing script
-        function toggleMenu() {
-            const navLinks = document.getElementById('nav-links');
-            const hamburger = document.querySelector('.hamburger');
-            navLinks.classList.toggle('active');
-            hamburger.classList.toggle('active');
-        }
-
-        function setupMobileMenu() {
-            const hamburger = document.querySelector('.hamburger');
-            if (hamburger) {
-                hamburger.addEventListener('click', toggleMenu);
-            }
-        }
-
         // Update DOMContentLoaded event
         document.addEventListener('DOMContentLoaded', function () {
             includeHTML(() => {
                 checkSession();
-                setupMobileMenu();
-                // Close mobile menu when clicking outside
-                document.addEventListener('click', (e) => {
-                    const navLinks = document.getElementById('nav-links');
-                    const hamburger = document.querySelector('.hamburger');
-                    if (!e.target.closest('#navbar') && navLinks.classList.contains('active')) {
-                        navLinks.classList.remove('active');
-                        hamburger.classList.remove('active');
-                    }
-                });
             });
         });
     </script>
@@ -142,6 +123,7 @@
         </div>
     </main>
 
+    <script src="JS/mobile-menu.js"></script>
     <div data-include="HTML/contact.html"></div>
     <div data-include="HTML/footer.html"></div>
 </body>
