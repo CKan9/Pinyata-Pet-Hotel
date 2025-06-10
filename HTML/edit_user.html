@@ -8,6 +8,7 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             loadUserDetails();
+            setupPasswordToggles();
 
             document.getElementById('backButton').addEventListener('click', function() {
                 window.location.href = 'staff_dashboard.html';
@@ -42,6 +43,20 @@
                 }
             })
             .catch(error => console.error('Error loading user details:', error));
+        }
+
+        // Set up password visibility toggles
+        function setupPasswordToggles() {
+            const toggleButtons = document.querySelectorAll('.toggle-password');
+            
+            toggleButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const wrapper = this.closest('.password-wrapper');
+                    const input = wrapper.querySelector('input');
+                    const type = input.type === 'password' ? 'text' : 'password';
+                    input.type = type;
+                });
+            });
         }
 
         function loadPetDetails(userId) {
@@ -138,8 +153,11 @@
                 <label>Phone:</label>
                 <input type="text" id="phone">
 
-                <label>Password:</label>
-                <input type="password" id="password" placeholder="Leave blank to keep current password">
+                <label>New Password:</label>
+                <div class="password-wrapper">
+                    <input type="password" id="password" placeholder="Leave blank to keep current password">
+                    <button type="button" class="toggle-password">show</button>
+                </div>
 
                 <button type="submit">Update</button>
                 <button type="button" id="backButton">Back</button>

@@ -1,36 +1,33 @@
 <?php
-declare(strict_types=1);
-require_once __DIR__ . '/config.php';
+require 'config.php';
 
 header('Content-Type: application/json');
 
 try {
     if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
-        http_response_code(405);
-        exit(json_encode(['success' => false, 'message' => 'Method Not Allowed']));
+        throw new Exception('Invalid request method');
     }
 
-    $token = $_GET['token'] ?? '';
-    if (empty($token)) {
-        throw new Exception('Missing token');
+    if (!isset($_GET['token'])) {
+        throw new Exception('Token parameter missing');
     }
 
-    $stmt = $pdo->prepare("SELECT * FROM password_resets 
-                          WHERE token = ? AND used = 0 AND expires_at > NOW()");
-    $stmt->execute([$token]);
-    $reset = $stmt->fetch();
+    $token = $conn->real_escape_string($_GET['token']);
 
-    if (!$reset) {
+    $result = $conn->query("SELECT * FROM password_resets 
+                          WHERE token = '$token' 
+                          AND used = 0 
+                          AND expires_at > NOW()");
+
+    if (!$result || $result->num_rows === 0) {
         throw new Exception('Invalid or expired token');
     }
 
+    $reset = $result->fetch_assoc();
     echo json_encode(['success' => true, 'email' => $reset['email']]);
     
-} catch (PDOException $e) {
-    http_response_code(500);
-    exit(json_encode(['success' => false, 'message' => 'Database error']));
-} catch (Exception $e) {
+} catch(Exception $e) {
     http_response_code(400);
-    exit(json_encode(['success' => false, 'message' => $e->getMessage()]));
+    echo json_encode(['success' => false, 'message' => $e->getMessage()]);
 }
 ?>

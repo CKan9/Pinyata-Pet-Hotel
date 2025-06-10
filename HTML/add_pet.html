@@ -147,8 +147,16 @@
                 checkSession();
                 initializeForm();
                 loadPetData();
+                bindLogoutButton();
             });
         });
+
+        function bindLogoutButton() {
+            const logoutBtn = document.getElementById('logoutBtn');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', logoutUser);
+            }
+        }
 
         // Pet data loading
         function loadPetData() {

@@ -38,14 +38,39 @@ if (json_last_error() !== JSON_ERROR_NONE || !isset($input['message'])) {
 $userMessage = trim($input['message']);
 
 // ========== Database Responses ==========
-// Check available rooms on a specific date
-if (preg_match('/room.*available.*(\d{4}-\d{2}-\d{2})/i', $userMessage, $matches)) {
+// Check available rooms on a specific date AND pet type
+if (preg_match('/room.*available.*(for a (cat|dog|bird|rabbit|fish|hamster)).*on.*(\d{4}-\d{2}-\d{2})/i', $userMessage, $matches)) {
+    $petType = strtolower($matches[2]); // Extract "cat", "dog", etc.
+    $date = $matches[3]; // Extract the date
+
+    // Prepare the statement to count available rooms for a specific pet type on a date
+    $stmt = $conn->prepare("
+        SELECT COUNT(*) AS available_rooms
+        FROM rooms
+        WHERE pet_type = ? -- Filter by pet type
+        AND room_id NOT IN (
+            SELECT room_id
+            FROM bookings
+            WHERE ? BETWEEN start_date AND end_date
+        )
+    ");
+    // Bind both the pet type and the date to the prepared statement
+    $stmt->bind_param('ss', $petType, $date); // 'ss' indicates two string parameters
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $row = $result->fetch_assoc();
+
+    echo json_encode(['reply' => "🐾 We have " . $row['available_rooms'] . " " . $petType . " room(s) available on $date. Would you like to book one?"]);
+    exit;
+}
+// Original date-only check (keep this as a fallback if no pet type is specified)
+else if (preg_match('/room.*available.*(\d{4}-\d{2}-\d{2})/i', $userMessage, $matches)) {
     $date = $matches[1];
-    $stmt = $conn->prepare("SELECT COUNT(*) AS available_rooms FROM rooms 
-                          WHERE room_id NOT IN (
-                              SELECT room_id FROM bookings 
-                              WHERE ? BETWEEN start_date AND end_date
-                          )");
+    $stmt = $conn->prepare("SELECT COUNT(*) AS available_rooms FROM rooms
+                            WHERE room_id NOT IN (
+                                SELECT room_id FROM bookings
+                                WHERE ? BETWEEN start_date AND end_date
+                            )");
     $stmt->bind_param('s', $date);
     $stmt->execute();
     $result = $stmt->get_result();
@@ -83,7 +108,7 @@ $endpoint = "https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flas
 // System instruction for the AI
 $systemInstruction = [
     "role" => "model",
-    "parts" => [["text" => "You are a friendly pet hotel assistant. Provide helpful, concise answers about pet accommodations, services, and bookings. For non-hotel questions, politely decline. Keep responses under 3 sentences."]]
+    "parts" => [["text" => "You are Rosalie, a friendly pet hotel assistant. Always introduce yourself as Rosalie. Provide helpful, concise answers about pet accommodations, services, and bookings. For non-hotel questions, politely decline. Keep responses under 3 sentences."]]
 ];
 
 // User message

@@ -159,6 +159,42 @@ input[type="text"] {
     color: #a94442;
 }
 
+/* Additional styles specifically for this page */
+.back-button-container {
+    display: flex;
+    justify-content: flex-start;
+    width: 100%;
+    margin-bottom: 15px;
+}
+        
+.back-button {
+    display: flex;
+    align-items: center;
+    background: none;
+    border: none;
+    color: #4CAF50;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 500;
+    padding: 8px 15px;
+    border-radius: 4px;
+    transition: background-color 0.3s;
+}
+        
+.back-button:hover {
+    background-color: rgba(76, 175, 80, 0.1);
+}
+        
+.back-button svg {
+    margin-right: 8px;
+}
+        
+.form-container {
+    position: relative;
+}
+
+
+
 /* Mobile Styles */
 @media (max-width: 768px) {
     #mani {

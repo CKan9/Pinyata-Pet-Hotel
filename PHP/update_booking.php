@@ -27,7 +27,6 @@ $start_date = $_POST['start_date'];
 $end_date = $_POST['end_date'];
 $total_amount = floatval($_POST['total_amount']);
 $booking_status = $_POST['booking_status'];
-$managed_by = !empty($_POST['managed_by']) ? intval($_POST['managed_by']) : null;
 
 // Optional: validate date format
 if (!strtotime($start_date) || !strtotime($end_date)) {
@@ -37,7 +36,7 @@ if (!strtotime($start_date) || !strtotime($end_date)) {
 
 // Update query
 $sql = "UPDATE bookings 
-        SET room_id = ?, start_date = ?, end_date = ?, total_amount = ?, booking_status = ?, managed_by = ?
+        SET room_id = ?, start_date = ?, end_date = ?, total_amount = ?, booking_status = ?
         WHERE booking_id = ?";
 
 $stmt = $conn->prepare($sql);
@@ -47,7 +46,7 @@ if (!$stmt) {
 }
 
 // Bind parameters
-$stmt->bind_param("issdsii", $room_id, $start_date, $end_date, $total_amount, $booking_status, $managed_by, $booking_id);
+$stmt->bind_param("issdsi", $room_id, $start_date, $end_date, $total_amount, $booking_status, $booking_id);
 
 if ($stmt->execute()) {
     echo json_encode(['success' => true, 'message' => 'Booking updated successfully']);

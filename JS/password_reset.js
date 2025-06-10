@@ -23,13 +23,20 @@ document.addEventListener('DOMContentLoaded', () => {
                     body: JSON.stringify({ email })
                 });
                 
+                // Check if response is JSON
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    const text = await response.text();
+                    throw new Error(`Invalid response: ${text}`);
+                }
+                
                 const result = await response.json();
                 
-                if (!response.ok) {
+                if (!response.ok || !result.success) {
                     throw new Error(result.message || 'Request failed');
                 }
                 
-                messageEl.textContent = 'Reset link sent! Check your email';
+                messageEl.textContent = result.message || 'Reset link sent! Check your email';
                 messageEl.className = 'message success';
                 
             } catch (error) {
@@ -40,55 +47,32 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Password update
     const resetPasswordForm = document.getElementById('resetPasswordForm');
     if (resetPasswordForm) {
-        const urlParams = new URLSearchParams(window.location.search);
-        const token = urlParams.get('token');
-        const statusEl = document.getElementById('resetStatus');
-
-        const verifyToken = async () => {
-            if (!token) {
-                statusEl.textContent = 'Missing reset token';
-                statusEl.className = 'message error';
-                resetPasswordForm.style.display = 'none';
-                return;
-            }
-            
-            try {
-                statusEl.textContent = 'Verifying token...';
-                statusEl.className = 'message info';
-
-                const response = await fetch(baseURL + `verify_token.php?token=${token}`);
-                if (!response.ok) throw new Error('Token verification failed');
-                
-                const data = await response.json();
-                if (!data.success) {
-                    throw new Error(data.message);
-                }
-                
-                document.getElementById('token').value = token;
-                statusEl.textContent = '';
-                
-            } catch (error) {
-                statusEl.textContent = errorMessages[error.message] || error.message;
-                statusEl.className = 'message error';
-                resetPasswordForm.style.display = 'none';
-            }
-        };
-
-        verifyToken();
-
         resetPasswordForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const formData = {
-                token: document.getElementById('token').value,
-                password: document.getElementById('new_password').value,
-                confirm_password: document.getElementById('confirm_password').value
-            };
+            const urlParams = new URLSearchParams(window.location.search);
+            const token = urlParams.get('token');
+            const password = document.getElementById('new_password').value;
+            const confirmPassword = document.getElementById('confirm_password').value;
+            const statusEl = document.getElementById('resetStatus');
 
-            if (formData.password !== formData.confirm_password) {
-                alert('Passwords do not match!');
+            if (!token) {
+                statusEl.textContent = 'Missing reset token in URL';
+                statusEl.className = 'message error';
+                return;
+            }
+
+            if (password.length < 8) {
+                statusEl.textContent = 'Password must be at least 8 characters';
+                statusEl.className = 'message error';
+                return;
+            }
+
+            // Validate password match
+            if (password !== confirmPassword) {
+                statusEl.textContent = 'Passwords do not match!';
+                statusEl.className = 'message error';
                 return;
             }
 
@@ -99,26 +83,33 @@ document.addEventListener('DOMContentLoaded', () => {
                 const response = await fetch(baseURL + 'update_password.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        token: formData.token,
-                        password: formData.password 
-                    })
+                    body: JSON.stringify({ token, password })
                 });
 
-                const result = await response.json();
+                // Handle non-JSON responses
+                const contentType = response.headers.get('content-type');
+                let result;
                 
-                statusEl.textContent = result.success 
-                    ? 'Password updated successfully!' 
-                    : result.message;
-                statusEl.className = `message ${result.success ? 'success' : 'error'}`;
-
-                if (result.success) {
-                    setTimeout(() => {
-                        window.location.href = 'login.html';
-                    }, 2000);
+                if (contentType && contentType.includes('application/json')) {
+                    result = await response.json();
+                } else {
+                    const text = await response.text();
+                    throw new Error(`Server responded with: ${text}`);
                 }
-            } catch (error) {
-                statusEl.textContent = 'Password update failed. Please try again.';
+
+                if (!response.ok || !result.success) {
+                    throw new Error(result.message || 'Password update failed');
+                }
+                
+                statusEl.textContent = 'Password updated successfully! Redirecting...';
+                statusEl.className = 'message success';
+                
+                setTimeout(() => {
+                    window.location.href = 'login.html';
+                }, 2000);
+                
+            } catch(error) {
+                statusEl.textContent = error.message || 'Error updating password';
                 statusEl.className = 'message error';
                 console.error('Password Update Error:', error);
             }

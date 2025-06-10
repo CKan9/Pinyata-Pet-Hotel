@@ -11,6 +11,15 @@
             loadSession();
             loadUsers();
             updateBookingStatuses();
+            
+            // Add event listeners for search functionality
+            document.getElementById('searchButton').addEventListener('click', searchUsers);
+            document.getElementById('searchInput').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    searchUsers();
+                }
+            });
+            document.getElementById('clearSearch').addEventListener('click', clearSearch);
         });
 
         function includeHTML() {
@@ -37,8 +46,15 @@
             .catch(error => console.error('Session Fetch Error:', error));
         }
 
-        function loadUsers() {
-            fetch('../PHP/get_users.php')
+        function loadUsers(searchTerm = '') {
+            let url = '../PHP/get_users.php';
+            
+            // Add search parameter if provided
+            if (searchTerm) {
+                url += `?search=${encodeURIComponent(searchTerm)}`;
+            }
+            
+            fetch(url)
             .then(response => response.json())
             .then(data => {
                 if (!data.success) {
@@ -46,25 +62,46 @@
                     return;
                 }
 
-            let tableBody = document.getElementById('userTableBody');
-            tableBody.innerHTML = '';
+                let tableBody = document.getElementById('userTableBody');
+                tableBody.innerHTML = '';
 
-            data.data.forEach(user => {
-                let row = `
-                    <tr>
-                        <td>${user.user_id}</td>
-                        <td>${user.username}</td>
-                        <td>${user.email}</td>
-                        <td>${user.phone}</td>
-                        <td>
-                            <button onclick="editUser(${user.user_id})">✎</button>
-                            <button onclick="deleteUser(${user.user_id})">Delete</button>
-                        </td>
-                    </tr>`;
-                tableBody.innerHTML += row;
-            });
-        })
-        .catch(error => console.error('Error loading users:', error));
+                // Show message if no users found
+                if (data.data.length === 0) {
+                    tableBody.innerHTML = `
+                        <tr>
+                            <td colspan="5" style="text-align: center; padding: 20px;">
+                                No users found matching your search criteria
+                            </td>
+                        </tr>`;
+                    return;
+                }
+
+                data.data.forEach(user => {
+                    let row = `
+                        <tr>
+                            <td>${user.user_id}</td>
+                            <td>${user.username}</td>
+                            <td>${user.email}</td>
+                            <td>${user.phone}</td>
+                            <td>
+                                <button class="edit-btn" onclick="editUser(${user.user_id})">✎</button>
+                                <button class="delete-btn" onclick="deleteUser(${user.user_id})">Delete</button>
+                            </td>
+                        </tr>`;
+                    tableBody.innerHTML += row;
+                });
+            })
+            .catch(error => console.error('Error loading users:', error));
+        }
+
+        function searchUsers() {
+            const searchTerm = document.getElementById('searchInput').value.trim();
+            loadUsers(searchTerm);
+        }
+        
+        function clearSearch() {
+            document.getElementById('searchInput').value = '';
+            loadUsers();
         }
 
         function editUser(userId) {
@@ -80,7 +117,9 @@
                 }).then(response => response.json())
                 .then(data => {
                     alert(data.message);
-                    loadUsers();
+                    // Reload with current search term
+                    const searchTerm = document.getElementById('searchInput').value.trim();
+                    loadUsers(searchTerm);
                 }).catch(error => console.error('Error deleting user:', error));
             }
         }
@@ -90,10 +129,6 @@
                 .then(response => response.text())
                 .then(message => {
                     console.log("Booking Status Update:", message);
-                    // Show notification to admin
-                    if (!message.includes("Error")) {
-                        alert(message); 
-                    }
                 })
                 .catch(error => console.error('Update Error:', error));
         }
@@ -106,10 +141,9 @@
     </script>
 </head>
 <body>
-
     <div class="container">
         <aside class="sidebar">
-            <h2>Username</h2>
+            <h2>Admin Dashboard</h2>
             <nav>
                 <ul>
                     <li><a href="#">Dashboard</a></li>
@@ -128,10 +162,18 @@
             </div>
             <div class="user-table">
                 <h2>Manage Users</h2>
+                
+                <!-- Search Section -->
+                <div class="search-section">
+                    <input type="text" id="searchInput" placeholder="Search by username, email, or phone...">
+                    <button id="searchButton">Search</button>
+                    <button id="clearSearch">Clear</button>
+                </div>
+                
                 <table border="1">
                     <thead>
                         <tr>
-                            <th>No</th>
+                            <th>ID</th>
                             <th>Username</th>
                             <th>Email</th>
                             <th>Phone</th>
@@ -147,6 +189,6 @@
     </div>
     <div data-include="contact.html"></div>
     <div data-include="footer.html"></div>
+    
 </body>
-<script src="../JS/chat_loader.js"></script>
 </html>
