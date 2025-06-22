@@ -1,6 +1,6 @@
 #chat-widget {
     position: fixed;
-    bottom: 20px;
+    bottom: 3px;
     right: 25px;
     z-index: 1000;
     font-family: Arial, sans-serif;
@@ -31,7 +31,7 @@
 }
 
 #chat-body {
-    width: 350px;
+    width: 325px;
     background: white;
     border-radius: 10px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.15);
@@ -56,6 +56,7 @@
     cursor: pointer;
     padding: 0;
     line-height: 1;
+    width: 15px;
 }
 
 #chat-messages {
@@ -94,17 +95,27 @@
 }
 
 #chat-input-container {
+    /* Keep existing styles */
     padding: 15px;
     display: flex;
     gap: 10px;
+    
+    /* Add these new properties */
+    width: 100%; /* Ensure full width */
+    box-sizing: border-box; /* Include padding in width */
 }
 
 #chat-input {
+    /* Keep existing styles */
     flex: 1;
     padding: 10px;
     border: 1px solid #ddd;
     border-radius: 4px;
     box-sizing: border-box;
+    
+    /* Add these fixes */
+    min-width: 0; /* Allow shrinking below content size */
+    width: 100%; /* Full width of container */
 }
 
 #chat-send {
@@ -114,6 +125,7 @@
     padding: 10px 15px;
     border-radius: 4px;
     cursor: pointer;
+    width: 75px;
 }
 
 #chat-send:hover {

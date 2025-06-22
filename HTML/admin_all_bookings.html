@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Bookings</title>
+    <link rel="stylesheet" href="../CSS/dashboard.css">
+    <script>
+        let bookingData = []; // Store booking data globally
+
+        document.addEventListener("DOMContentLoaded", async function() {
+            includeHTML();
+            await checkSession();
+            loadBookings();
+        });
+
+        function includeHTML() {
+            const includes = document.querySelectorAll('[data-include]');
+            includes.forEach(element => {
+                fetch(element.getAttribute('data-include'))
+                    .then(response => response.text())
+                    .then(data => element.innerHTML = data)
+                    .catch(err => console.error('Error loading file:', err));
+            });
+        }
+
+        async function checkSession() {
+            try {
+                const response = await fetch('../PHP/sessions.php', { credentials: 'include' });
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    const text = await response.text();
+                    throw new Error(`Expected JSON but got: ${text}`);
+                }
+                const data = await response.json();
+                if (!data.success) {
+                    console.warn('Session invalid, redirecting to login');
+                    window.location.href = '/PT/HTML/login.html';
+                }
+            } catch (error) {
+                console.error('Session Fetch Error:', error);
+                window.location.href = '/PT/HTML/login.html';
+            }
+        }
+
+        function loadBookings() {
+            const startDate = document.getElementById('searchStartDate').value;
+            const endDate = document.getElementById('searchEndDate').value;
+            const petId = document.getElementById('searchPet').value;
+            const status = document.getElementById('searchStatus').value;
+            const username = document.getElementById('searchUsername').value;
+
+            // Validate dates
+            if (startDate && endDate && startDate > endDate) {
+                alert('End Date cannot be before Start Date');
+                return;
+            }
+
+            fetch(`../PHP/admin_get_all_bookings.php?start_date=${startDate}&end_date=${endDate}&pet_id=${petId}&status=${status}&username=${username}`, { credentials: 'include' })
+                .then(response => {
+                    const contentType = response.headers.get('content-type');
+                    if (!response.ok) {
+                        return response.text().then(text => {
+                            try {
+                                const json = JSON.parse(text);
+                                throw new Error(json.message || response.statusText);
+                            } catch {
+                                throw new Error(`Server error: ${text || response.statusText}`);
+                            }
+                        });
+                    }
+                    if (!contentType || !contentType.includes('application/json')) {
+                        return response.text().then(text => {
+                            throw new Error(`Expected JSON but got: ${text}`);
+                        });
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    const bookingTable = document.getElementById('bookingTableBody');
+                    if (!bookingTable) return;
+                    
+                    bookingTable.innerHTML = '';
+                    bookingData = data.bookings || []; // Store data globally
+                    
+                    if (data.success && bookingData.length > 0) {
+                        bookingData.forEach((booking) => {
+                            bookingTable.innerHTML += `
+                                <tr>
+                                    <td>${booking.booking_id}</td>
+                                    <td>${booking.username}</td>
+                                    <td>${booking.email}</td>
+                                    <td>${booking.pet_id}</td>
+                                    <td>${booking.start_date}</td>
+                                    <td>${booking.end_date}</td>
+                                    <td><span class="status ${booking.booking_status}">${booking.booking_status}</span></td>
+                                    <td>
+                                        <button onclick="editBooking(${booking.booking_id})">Edit</button>
+                                        <button onclick="viewUser(${booking.user_id})">View User</button>
+                                    </td>
+                                </tr>
+                            `;
+                        });
+                    } else {
+                        bookingTable.innerHTML = `
+                            <tr>
+                                <td colspan="8">${data.message || 'No bookings found'}</td>
+                            </tr>
+                        `;
+                    }
+                })
+                .catch(error => {
+                    console.error("Booking Fetch Error:", error);
+                    const bookingTable = document.getElementById('bookingTableBody');
+                    if (bookingTable) {
+                        bookingTable.innerHTML = `
+                            <tr>
+                                <td colspan="8">Error: ${error.message}</td>
+                            </tr>
+                        `;
+                    }
+                });
+        }
+
+        function downloadPDF() {
+            if (bookingData.length === 0) {
+                alert('No bookings to download');
+                return;
+            }
+            const startDate = document.getElementById('searchStartDate').value;
+            const endDate = document.getElementById('searchEndDate').value;
+            const petId = document.getElementById('searchPet').value;
+            const status = document.getElementById('searchStatus').value;
+            const username = document.getElementById('searchUsername').value;
+
+            if (startDate && endDate && startDate > endDate) {
+                alert('End Date cannot be before Start Date');
+                return;
+            }
+
+            window.location.href = `../PHP/admin_get_all_bookings.php?start_date=${startDate}&end_date=${endDate}&pet_id=${petId}&status=${status}&username=${username}&format=pdf`;
+        }
+
+        function downloadExcel() {
+            if (bookingData.length === 0) {
+                alert('No bookings to download');
+                return;
+            }
+            const startDate = document.getElementById('searchStartDate').value;
+            const endDate = document.getElementById('searchEndDate').value;
+            const petId = document.getElementById('searchPet').value;
+            const status = document.getElementById('searchStatus').value;
+            const username = document.getElementById('searchUsername').value;
+
+            if (startDate && endDate && startDate > endDate) {
+                alert('End Date cannot be before Start Date');
+                return;
+            }
+
+            window.location.href = `../PHP/admin_get_all_bookings.php?start_date=${startDate}&end_date=${endDate}&pet_id=${petId}&status=${status}&username=${username}&format=excel`;
+        }
+
+        function editBooking(booking_id) {
+            window.location.href = `admin_edit_booking.html?booking_id=${booking_id}`;
+        }
+
+        function viewUser(user_id) {
+            window.location.href = `admin_manage_user_bookings.html?id=${user_id}`;
+        }
+
+        function logout() {
+            fetch('../PHP/logout.php', { credentials: 'include' })
+                .then(() => window.location.href = '/PT/HTML/login.html')
+                .catch(err => console.error("Logout error:", err));
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <h2 id="userName">Admin Panel</h2>
+            <nav>
+                <ul>
+                    <li><a href="staff_dashboard.html">Dashboard</a></li>
+                    <li><a href="admin_booking.html">Manage Bookings</a></li>
+                    <li><a href="admin_all_bookings.html">All Bookings</a></li>
+                    <li><a href="admin_room.html">Rooms</a></li>
+                    <li><a href="#" onclick="logout()">Log out</a></li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="content">
+            <h1>All Bookings</h1>
+
+            <!-- Filter Section -->
+            <div class="filters">
+                <label for="searchStartDate">Start Date:</label>
+                <input type="date" id="searchStartDate">
+
+                <label for="searchEndDate">End Date:</label>
+                <input type="date" id="searchEndDate">
+
+                <label for="searchPet">Pet ID:</label>
+                <input type="text" id="searchPet" placeholder="Enter pet ID">
+
+                <label for="searchStatus">Status:</label>
+                <select id="searchStatus">
+                    <option value="">All</option>
+                    <option value="Pending">Pending</option>
+                    <option value="Paid">Paid</option>
+                    <option value="Cancelled">Cancelled</option>
+                    <option value="Completed">Completed</option>
+                </select>
+
+                <label for="searchUsername">Username:</label>
+                <input type="text" id="searchUsername" placeholder="Enter username">
+
+                <button onclick="loadBookings()">Search</button>
+                <button onclick="window.location.href='admin_booking.html'">Back</button>
+                <button onclick="downloadPDF()">Download PDF</button>
+                <button onclick="downloadExcel()">Download Excel</button>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Booking ID</th>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>Pet ID</th>
+                        <th>Check-In Date</th>
+                        <th>Check-Out Date</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="bookingTableBody"></tbody>
+            </table>
+        </main>
+    </div>
+
+    <div data-include="footer.html"></div>
+    <script src="../JS/chat_loader.js"></script>
+</body>
+</html>
