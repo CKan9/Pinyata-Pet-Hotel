@@ -102,4 +102,8 @@ To add a pet:
 | USER  | Harry123@gmail.com     | 4r3e2w1q    |
 | USER  | user1@gmail.com        | 0987654321  |
 
+## Sample and demo
+
+Video Link: https://youtu.be/3Z3DnVWsIMo
+
 
