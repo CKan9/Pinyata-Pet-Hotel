@@ -7,22 +7,34 @@ This system allows pet owners to book pet hotel rooms, manage bookings, make pay
 This project is for educational purposes only. No real transactions will occur and all data is for testing or demonstration.
 
 ## 🚦 Getting Started
+### 💻 System Requirements
+- Windows 10 or higher
+- Web browser: Chrome, Firefox, Edge
+- PHP ≥ 7.4
+- MySQL ≥ 5.7
+- WampServer64 / XAMPP (Apache + MySQL)
+
 ### Deploy Website To Local Machine
 
 <details>
   Run Locally with Wampserver64/XAMPP
   -Wampserver64
-  1. Copy project files into wamp64/htdocs/
+  1. Copy project files into wamp64/www/PT
   2. Launch Wampserver64
   3. Import the .sql file into phpMyAdmin
   4. Access via http://localhost/index.html
 
   -XAMPP
-  1. Copy project files into xampp/htdocs/
+  1. Copy project files into xampp/www/PT
   2. Launch XAMPP → Start Apache and MySQL
   3. Import the .sql file into phpMyAdmin
   4. Access via http://localhost/index.html
 </details>
+
+#### 🗃️ Importing the Database
+1. Open `phpMyAdmin`
+2. Create a new database (e.g., `pinyatahotel`)
+3. Click **Import** → Select `pinyatahotel.sql` → Execute
 
 ### User Role
 Pet Owners
@@ -101,6 +113,22 @@ To add a pet:
 | USER  | james@gmail.com        | james666    |
 | USER  | Harry123@gmail.com     | 4r3e2w1q    |
 | USER  | user1@gmail.com        | 0987654321  |
+
+## Folder Hierarchy
+
+```
+PT/
+├── HTML/
+├── IMG/
+│   ├── uploads
+├── JS/
+├── PHP/
+├── css/
+├── vendor/
+├── Error/
+├── index.html
+├── pinyatahotel.sql
+```
 
 ## Sample and demo
 
