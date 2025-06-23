@@ -36,7 +36,7 @@
             const username = document.getElementById('loginUsername').value;
             const password = document.getElementById('loginPassword').value;
 
-            fetch('/PT/PHP/login.php', {
+            fetch('../PHP/login.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username, password })
@@ -46,8 +46,8 @@
                 alert(data.message);
                 if (data.success) {
                     window.location.href = data.role === 'staff' 
-                        ? '/PT/HTML/staff_dashboard.html' 
-                        : '/PT/HTML/guest_dashboard.html';
+                        ? '../HTML/staff_dashboard.html' 
+                        : '../HTML/guest_dashboard.html';
                 }
             })
             .catch(error => {
@@ -77,7 +77,7 @@
                 return;
             }
 
-            fetch('/PT/PHP/register.php', {
+            fetch('../PHP/register.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(formData)

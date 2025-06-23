@@ -1,6 +1,0 @@
-Array
-(
-    [id] => undefined
-    [username] => roots
-    [phone] => 0123456789
-)

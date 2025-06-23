@@ -98,7 +98,7 @@
                 userData.password = passwordInput.value;
             }
 
-            fetch('/PT/PHP/update_user_admin.php', {
+            fetch('../PHP/update_user_admin.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(userData)
@@ -119,7 +119,7 @@
 
         function logout() {
             fetch('../PHP/logout.php')
-                .then(() => window.location.href = '/PT/HTML/login.html')
+                .then(() => window.location.href = '../HTML/login.html')
                 .catch(err => console.error("Logout error:", err));
         }
         
