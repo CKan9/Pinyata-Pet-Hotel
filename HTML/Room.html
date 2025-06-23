@@ -49,7 +49,7 @@
                             `<div class="user-dropdown">
                                 <a href="#">Hi, ${data.username} </a>
                                 <div class="dropdown-content">
-                                    <a href="HTML/guest_dashboard.html">Profile</a>
+                                    <a href="../HTML/guest_dashboard.html">Profile</a>
                                     <a href="#" id="headerLogout">Log out</a>
                                 </div>
                             </div>`;
@@ -74,7 +74,7 @@
     
         function logoutUser() {
             fetch('../PHP/logout.php')
-                .then(() => window.location.href = '/PT/HTML/login.html')
+                .then(() => window.location.href = '../HTML/login.html')
                 .catch(err => console.error("Logout error:", err));
         }
     

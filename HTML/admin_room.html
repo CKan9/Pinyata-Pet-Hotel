@@ -46,7 +46,7 @@
                     if (data.success) {
                         document.getElementById('userName').textContent = data.username || "Staff";
                     } else {
-                        window.location.href = '/PT/HTML/login.html';
+                        window.location.href = '../HTML/login.html';
                     }
                 })
                 .catch(error => console.error('Session Fetch Error:', error));
@@ -117,7 +117,7 @@
 
         function logout() {
             fetch('../PHP/logout.php')
-                .then(() => window.location.href = '/PT/HTML/login.html')
+                .then(() => window.location.href = '../HTML/login.html')
                 .catch(err => console.error("Logout error:", err));
         }
 

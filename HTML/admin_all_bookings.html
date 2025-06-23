@@ -35,11 +35,11 @@
                 const data = await response.json();
                 if (!data.success) {
                     console.warn('Session invalid, redirecting to login');
-                    window.location.href = '/PT/HTML/login.html';
+                    window.location.href = '../HTML/login.html';
                 }
             } catch (error) {
                 console.error('Session Fetch Error:', error);
-                window.location.href = '/PT/HTML/login.html';
+                window.location.href = '../HTML/login.html';
             }
         }
 
@@ -170,7 +170,7 @@
 
         function logout() {
             fetch('../PHP/logout.php', { credentials: 'include' })
-                .then(() => window.location.href = '/PT/HTML/login.html')
+                .then(() => window.location.href = '../HTML/login.html')
                 .catch(err => console.error("Logout error:", err));
         }
     </script>
